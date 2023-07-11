@@ -1,9 +1,11 @@
 package com.crumbed.crumbmmo.stats;
 
+import com.crumbed.crumbmmo.utils.ActionBar;
 import com.crumbed.crumbmmo.utils.Option;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.ChatColor;
 
-public class Health implements Stat {
+public class Health implements Stat, ActionBar {
     private double value;
     private double baseHealth;
     public static final double DEFAULT = 100;
@@ -54,6 +56,17 @@ public class Health implements Stat {
             healthScale = Math.round(healthScale / 2) * 2;
 
         return healthScale;
+    }
+
+    @Override
+    public String genActBar() {
+        return String.format(
+                "%s%s/%s",
+                ChatColor.RED,
+                (int) value,
+                (int) baseHealth
+        );
+
     }
 }
 
