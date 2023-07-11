@@ -15,7 +15,7 @@ public class CEntity {
 
     public CEntity(EntityComponent... components) {
         this.id = UUID.randomUUID();
-        this.components = (ArrayList<EntityComponent>) Arrays.asList(components);
+        this.components = new ArrayList<>(Arrays.asList(components));
     }
 
     public boolean hasComponents(EntityComponent.ComponentType... filter) {

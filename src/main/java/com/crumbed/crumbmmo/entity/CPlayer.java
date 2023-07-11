@@ -1,16 +1,15 @@
 package com.crumbed.crumbmmo.entity;
 
-import com.crumbed.crumbmmo.entity.components.EntityInventory;
-import com.crumbed.crumbmmo.entity.components.EntityStats;
-import com.crumbed.crumbmmo.entity.components.RawEntity;
-import com.crumbed.crumbmmo.entity.components.RawLivingEntity;
+import com.crumbed.crumbmmo.entity.components.*;
 import com.crumbed.crumbmmo.entity.systems.PlayerInvUpdate;
 import com.crumbed.crumbmmo.items.CItem;
 import com.crumbed.crumbmmo.stats.*;
+import com.crumbed.crumbmmo.utils.ActionBar;
 import com.google.gson.annotations.SerializedName;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.attribute.Attribute;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
 import java.util.*;
@@ -24,13 +23,16 @@ public class CPlayer extends CEntity {
     private EntityStats stats;
     public EntityInventory inv;
 
-    public CPlayer(RawLivingEntity livingEntity, RawEntity entity, EntityStats stats, EntityInventory inv) {
-        super( livingEntity, entity, stats, inv);
+    public transient EntityActionBar actionBar;
+
+    public CPlayer(RawLivingEntity livingEntity, RawEntity entity, EntityStats stats, EntityInventory inv, EntityActionBar actionBar) {
+        super( livingEntity, entity, stats, inv, actionBar);
         assert livingEntity.raw instanceof Player;
         this.rawPlayer = (Player) livingEntity.raw;
         this.playerUuid = rawPlayer.getUniqueId();
         this.inv = inv;
         this.stats = stats;
+        this.actionBar = actionBar;
     }
     public static CPlayer newPlayer(Player p) {
         ArrayList<Stat> statsList = (ArrayList<Stat>) Stream
@@ -50,7 +52,11 @@ public class CPlayer extends CEntity {
                 (Mana) statsList.get(PlayerInvUpdate.MANA)
         );
 
-        return new CPlayer(new RawLivingEntity(p), new RawEntity(p), stats, new EntityInventory());
+        EntityActionBar actionBar = new EntityActionBar(
+                stats.health, stats.defense, stats.mana
+        );
+
+        return new CPlayer(new RawLivingEntity(p), new RawEntity(p), stats, new EntityInventory(), actionBar);
     }
 
     @Override
@@ -64,6 +70,7 @@ public class CPlayer extends CEntity {
         addComponent(new RawEntity(rawPlayer));
         addComponent(inv);
         addComponent(stats);
+        addComponent(new EntityActionBar(stats.health, stats.defense, stats.mana));
     }
 
     public String getName() { return rawPlayer.getName(); }

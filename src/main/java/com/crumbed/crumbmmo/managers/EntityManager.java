@@ -4,6 +4,7 @@ import com.crumbed.crumbmmo.CrumbMMO;
 import com.crumbed.crumbmmo.entity.CEntity;
 import com.crumbed.crumbmmo.entity.EntityComponent;
 import com.crumbed.crumbmmo.entity.EntitySystem;
+import com.crumbed.crumbmmo.entity.systems.ActionBarSystem;
 import com.crumbed.crumbmmo.entity.systems.PlayerInvUpdate;
 import com.crumbed.crumbmmo.entity.systems.StatRegen;
 import com.crumbed.crumbmmo.entity.systems.SyncHealthTypes;
@@ -21,7 +22,8 @@ public class EntityManager {
     private static final EntitySystem SYSTEMS[] = {
             new StatRegen(),
             new PlayerInvUpdate(),
-            new SyncHealthTypes()
+            new SyncHealthTypes(),
+            new ActionBarSystem()
     };
 
     private EntityManager() { entities = new HashMap<>(); }

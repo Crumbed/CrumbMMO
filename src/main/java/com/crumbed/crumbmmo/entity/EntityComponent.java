@@ -5,6 +5,7 @@ public interface EntityComponent {
 
     enum ComponentType {
         Stats,
+        ActionBar,
         RawEntity,
         RawLivingEntity,
         Inventory,
