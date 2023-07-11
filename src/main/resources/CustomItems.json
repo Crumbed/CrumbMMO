@@ -1,0 +1,18 @@
+{
+  "item-ids": [
+    "aspect_of_the_end"
+  ],
+  "items": {
+    "aspect_of_the_end": {
+      "name": "Aspect of the end",
+      "stats": {
+        "damage": 100,
+        "strength": 100
+      },
+      "rarity": "rare",
+      "item-id": "aspect_of_the_end",
+      "material": "DIAMOND_SWORD",
+      "type": "sword"
+    }
+  }
+}

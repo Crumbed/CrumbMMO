@@ -1,0 +1,19 @@
+{
+  "mob-types": [ ],
+  "vanilla-mobs": {
+    "zombie": {
+      "base-level": 1,
+      "variants": {
+        "10": "brute_zombie",
+        "25": "zombie_knight"
+      }
+    }
+  },
+  "mob-variants": {
+    "brute_zombie": {
+      "name": "Zombie Brute",
+      "stats": {},
+    }
+  },
+  "custom-mobs": { }
+}

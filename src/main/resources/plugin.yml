@@ -1,0 +1,20 @@
+name: CrumbMMO
+version: '${project.version}'
+main: com.crumbed.crumbmmo.CrumbMMO
+api-version: '1.20'
+commands:
+  cplayers:
+    description: "lists all players in json"
+    usage: "/cplayers"
+  cmmo:
+    description: "parent command for cmmo"
+    usage: "/cmmo"
+  cgive:
+    description: "gives a custom item"
+    usage: "/cgive"
+  cpinv:
+    description: "views a players inventory"
+    usage: "/cpinv <player-ign>"
+  creload:
+    description: "reloads server plugins"
+    usage: "/creload"
