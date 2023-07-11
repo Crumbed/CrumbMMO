@@ -14,6 +14,18 @@ public class StatManager {
     }
 
 
+    /**
+     * Calculate the damage an attack will deal
+     *
+     * @param   dmg             damage
+     * @param   str             strength
+     * @param   critDamage      crit damage
+     * @param   critChance      crit chance
+     * @param   attackCooldown  attack cooldown
+     * @param   dt              damage type
+     *
+     * @return  A DamageValue that represents the calculated damage
+     */
     public DamageValue calcDamage(
             Damage dmg,
             Strength str,

@@ -35,7 +35,7 @@ public final class CrumbMMO extends JavaPlugin {
         pm.registerEvents(new PlayerJoinAndLeave(this), this);
         pm.registerEvents(new PlayerInvUpdate(), this);
 
-        // getLogger().info(packageName);
+        // Gaming for auto register commands
         Reflections classes = new Reflections("com.crumbed.crumbmmo.commands");
         for (Class<?> clazz : classes.get(SubTypes.of(CustomCommand.class).asClass())) {
             try {

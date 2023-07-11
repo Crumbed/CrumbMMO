@@ -22,7 +22,6 @@ public class CPlayer extends CEntity {
     private final UUID playerUuid;
     private EntityStats stats;
     public EntityInventory inv;
-
     public transient EntityActionBar actionBar;
 
     public CPlayer(RawLivingEntity livingEntity, RawEntity entity, EntityStats stats, EntityInventory inv, EntityActionBar actionBar) {

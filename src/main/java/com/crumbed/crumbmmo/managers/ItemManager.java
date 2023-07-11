@@ -28,12 +28,18 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 
+/**
+ * Manager for all Item related activities
+ */
 public class ItemManager {
     public static Option<ItemManager> INSTANCE = Option.none();
 
     @SerializedName("item-ids")
     private ArrayList<String> itemIds;
     private JsonObject items;
+    /**
+     * map from item-id -> CItem
+     */
     public transient HashMap<String, CItem> itemReg;
     public transient CrumbMMO plugin;
 

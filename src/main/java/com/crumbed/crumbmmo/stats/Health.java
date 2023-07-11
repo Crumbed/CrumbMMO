@@ -17,11 +17,20 @@ public class Health implements Stat, ActionBar {
 
     @Override
     public GenericStat getGenericType() { return GenericStat.Health; }
+
     @Override
     public double getValue() { return value; }
     @Override
     public void setValue(double value) { this.value = value; }
+
+    /**
+     * @return  The MAX health value 235/[1000]
+     */
     public double getBaseValue() { return baseHealth; }
+
+    /**
+     * @param   value   The new MAX health value
+     */
     public void setBaseValue(double value) { this.baseHealth = value; }
     @Override
     public Option<Double> getDefaultValue() { return Option.some(DEFAULT); }

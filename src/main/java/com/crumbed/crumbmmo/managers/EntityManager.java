@@ -16,9 +16,19 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+/**
+ * Manager for all thing related to entities
+ */
 public class EntityManager {
     public static Option<EntityManager> INSTANCE = Option.none();
+    /**
+     * Map from Entity ID -> CEntity
+     */
     private HashMap<UUID, CEntity> entities;
+
+    /**
+     * All registered systems
+     */
     private static final EntitySystem SYSTEMS[] = {
             new StatRegen(),
             new PlayerInvUpdate(),

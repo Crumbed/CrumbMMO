@@ -27,7 +27,9 @@ import java.util.stream.Stream;
 
 public class PlayerManager {
     public static Option<PlayerManager> INSTANCE = Option.none();
-    // mc uuid to entity id
+    /**
+     * Map from MC UUID -> Entity ID
+     */
     private HashMap<UUID, UUID> playerIds;
     private JsonPlayerData playerData;
     private HashMap<UUID, Double> playerHealthScales;
@@ -56,11 +58,14 @@ public class PlayerManager {
 
     public void addPlayer(final Player player) {
         CPlayer p;
+        // if player is new
         if (!playerData.isPlayerRegistered(player.getUniqueId())) {
             p = CPlayer.newPlayer(player);
         } else {
             p = playerData.loadPlayer(player.getUniqueId());
         }
+
+        // Calculate player health scale
         double healthScale = p.getStats()
                 .health
                 .calcHealthScale();
@@ -70,6 +75,7 @@ public class PlayerManager {
 
         manager.syncPlayerInv(p);
 
+        // Add player to EntityManager & playerIds
         playerIds.put(p.getUUID(), p.id);
         EntityManager
                 .INSTANCE
@@ -77,6 +83,11 @@ public class PlayerManager {
                 .addEntity(p);
     }
 
+    /**
+     * @param   uuid    MC UUID of the Player
+     * @return  Option.some if CPlayer exists
+     * @return  Option.none otherwise
+     */
     public Option<CPlayer> getPlayer(UUID uuid) {
         Option<CEntity> entity = EntityManager
                 .INSTANCE
@@ -92,11 +103,21 @@ public class PlayerManager {
         return Option.none();
     }
 
+    /**
+     * @param   player  Player
+     * @return  Option.some if CPlayer exists
+     * @return  Option.none otherwise
+     */
     public Option<CPlayer> getPlayer(Player player) {
         if (player == null) return Option.none();
         return getPlayer(player.getUniqueId());
     }
 
+    /**
+     * @param   name  name of the Player
+     * @return  Option.some if CPlayer exists
+     * @return  Option.none otherwise
+     */
     public Option<CPlayer> getPlayer(String name) {
         List<CPlayer> players = getPlayers()
                 .filter(p -> p.rawPlayer.getName()
@@ -107,6 +128,9 @@ public class PlayerManager {
         return Option.some(players.get(0));
     }
 
+    /**
+     * @return  A stream of all CPlayers
+     */
     public Stream<CPlayer> getPlayers() {
         return playerIds.values()
                 .stream()
@@ -118,6 +142,12 @@ public class PlayerManager {
                 .distinct();
     }
 
+    /**
+     * Syncs the CPlayer EntityInventory component with the vanilla inventory
+     *
+     * @param   p   The CPlayer whose inventory should be synced
+     * @return  An array from the sum of all stat boosts
+     */
     public double[] syncPlayerInv(CPlayer p) {
         double[] swapStats = new double[7];
         PlayerInventory inv = p.rawPlayer.getInventory();
