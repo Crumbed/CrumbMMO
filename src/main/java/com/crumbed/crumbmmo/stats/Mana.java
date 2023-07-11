@@ -1,9 +1,11 @@
 package com.crumbed.crumbmmo.stats;
 
+import com.crumbed.crumbmmo.utils.ActionBar;
 import com.crumbed.crumbmmo.utils.Option;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.ChatColor;
 
-public class Mana implements Stat {
+public class Mana implements Stat, ActionBar {
     private double baseMana;
     private double value;
     public static double DEFAULT = 100;
@@ -34,6 +36,16 @@ public class Mana implements Stat {
     public String display() {
         return String.format("%sMana: %s+%d",
                 ChatColor.GRAY, ChatColor.GREEN, (int) this.baseMana
+        );
+    }
+
+    @Override
+    public String genActBar() {
+        return String.format(
+                "%s%s/%s",
+                ChatColor.BLUE,
+                (int) value,
+                (int) baseMana
         );
     }
 }
