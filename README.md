@@ -4,6 +4,8 @@ CrumbedMMO is an open source MMO style minecraft plugin inspired by Hypixel Skyb
 ---
 ## Style guide
 --- 
+TEST
+
 - **Local Variables** should be camelCase and descriptive.
 - **Global Variables** should be ALL_CAPS and descriptive.
 - **Functions** should be camelCase and desciptive.
