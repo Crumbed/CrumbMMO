@@ -1,5 +1,7 @@
 package com.crumbed.crumbmmo.entity;
 
+import com.crumbed.crumbmmo.entity.components.EntityStats;
+import com.crumbed.crumbmmo.entity.components.RawEntity;
 import com.crumbed.crumbmmo.utils.Option;
 
 import java.util.ArrayList;

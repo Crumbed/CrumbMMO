@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class CItem {
+    // A blank item
     public static final CItem EMPTY = new CItem();
     @SerializedName("display-name")
     private String name;
@@ -27,6 +28,9 @@ public class CItem {
     private transient ItemStack rawItem;
 
 
+    /**
+     * Constructs a blank CItem
+     */
     public CItem() {
         itemId = "NULL";
         name = "";

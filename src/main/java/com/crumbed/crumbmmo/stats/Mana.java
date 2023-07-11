@@ -19,7 +19,15 @@ public class Mana implements Stat {
     public double getValue() { return value; }
     @Override
     public void setValue(double value) { this.value = value; }
+
+    /**
+     * @return  The MAX mana value
+     */
     public double getBaseValue() { return baseMana; }
+
+    /**
+     * @param   value   The new MAX mana value
+     */
     public void setBaseValue(double value) { this.baseMana = value; }
     @Override
     public Option<Double> getDefaultValue() { return Option.some(DEFAULT); }

@@ -1,9 +1,6 @@
 package com.crumbed.crumbmmo.entity;
 
-import com.crumbed.crumbmmo.entity.components.EntityInventory;
-import com.crumbed.crumbmmo.entity.components.EntityStats;
-import com.crumbed.crumbmmo.entity.components.RawEntity;
-import com.crumbed.crumbmmo.entity.components.RawLivingEntity;
+import com.crumbed.crumbmmo.entity.components.*;
 import com.crumbed.crumbmmo.entity.systems.PlayerInvUpdate;
 import com.crumbed.crumbmmo.items.CItem;
 import com.crumbed.crumbmmo.stats.*;
@@ -25,7 +22,7 @@ public class CPlayer extends CEntity {
     public EntityInventory inv;
 
     public CPlayer(RawLivingEntity livingEntity, RawEntity entity, EntityStats stats, EntityInventory inv) {
-        super( livingEntity, entity, stats, inv);
+        super( livingEntity, entity, stats, inv );
         assert livingEntity.raw instanceof Player;
         this.rawPlayer = (Player) livingEntity.raw;
         this.playerUuid = rawPlayer.getUniqueId();
