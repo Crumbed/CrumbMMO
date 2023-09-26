@@ -12,7 +12,8 @@
   "mob-variants": {
     "brute_zombie": {
       "name": "Zombie Brute",
-      "stats": {},
+      "stats": {
+      }
     }
   },
   "custom-mobs": { }

@@ -3,9 +3,9 @@ version: '${project.version}'
 main: com.crumbed.crumbmmo.CrumbMMO
 api-version: '1.20'
 commands:
-  cplayers:
-    description: "lists all players in json"
-    usage: "/cplayers"
+  cdebug:
+    description: "root debug command for cmmo"
+    usage: "/cdebug"
   cmmo:
     description: "parent command for cmmo"
     usage: "/cmmo"

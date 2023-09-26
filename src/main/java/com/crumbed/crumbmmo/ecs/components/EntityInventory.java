@@ -1,13 +1,14 @@
-package com.crumbed.crumbmmo.entity.components;
+package com.crumbed.crumbmmo.ecs.components;
 
-import com.crumbed.crumbmmo.entity.EntityComponent;
+import com.crumbed.crumbmmo.ecs.EntityComponent;
 import com.crumbed.crumbmmo.items.CItem;
 
 import java.util.ArrayList;
 
-public class EntityInventory implements EntityComponent {
-    private static final ComponentType TYPE = ComponentType.Inventory;
-
+public class EntityInventory extends EntityComponent {
+    public static int ID;
+    @Override
+    public int id() { return ID; }
     public CItem armor[]; // 5 long
     public transient CItem inventory[]; // 36 long
     public int activeSlot;
@@ -28,9 +29,6 @@ public class EntityInventory implements EntityComponent {
         statBoosts = new ArrayList<>();
         hasUpdated = true;
     }
-
-    @Override
-    public ComponentType getType() { return TYPE; }
 }
 
 

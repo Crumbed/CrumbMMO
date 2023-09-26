@@ -1,12 +1,14 @@
-package com.crumbed.crumbmmo.entity.components;
+package com.crumbed.crumbmmo.ecs.components;
 
-import com.crumbed.crumbmmo.entity.EntityComponent;
+import com.crumbed.crumbmmo.ecs.EntityComponent;
 import com.crumbed.crumbmmo.stats.*;
 import com.google.gson.annotations.SerializedName;
 import org.bukkit.ChatColor;
 
-public class EntityStats implements EntityComponent {
-    private static final ComponentType TYPE = ComponentType.Stats;
+public class EntityStats extends EntityComponent {
+    public static int ID;
+    @Override
+    public int id() { return ID; }
 
     public Damage damage;
     public Strength strength;
@@ -36,9 +38,6 @@ public class EntityStats implements EntityComponent {
         this.defense = defense;
         this.mana = mana;
     }
-
-    @Override
-    public ComponentType getType() { return TYPE; }
 
 
 

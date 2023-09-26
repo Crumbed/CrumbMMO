@@ -1,7 +1,7 @@
 package com.crumbed.crumbmmo.managers;
 
 import com.crumbed.crumbmmo.CrumbMMO;
-import com.crumbed.crumbmmo.entity.CPlayer;
+import com.crumbed.crumbmmo.ecs.CPlayer;
 import com.crumbed.crumbmmo.items.CItem;
 import com.crumbed.crumbmmo.items.Rarity;
 import com.crumbed.crumbmmo.utils.Option;

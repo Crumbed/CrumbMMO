@@ -1,15 +1,12 @@
-package com.crumbed.crumbmmo.entity;
+package com.crumbed.crumbmmo.ecs;
 
-import com.crumbed.crumbmmo.entity.components.*;
-import com.crumbed.crumbmmo.entity.systems.PlayerInvUpdate;
-import com.crumbed.crumbmmo.items.CItem;
+import com.crumbed.crumbmmo.ecs.components.*;
+import com.crumbed.crumbmmo.ecs.systems.PlayerInvUpdate;
 import com.crumbed.crumbmmo.stats.*;
-import com.crumbed.crumbmmo.utils.ActionBar;
-import com.google.gson.annotations.SerializedName;
+import com.crumbed.crumbmmo.serializable.PlayerData;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.attribute.Attribute;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
 import java.util.*;
@@ -17,18 +14,34 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class CPlayer extends CEntity {
-    public transient Player rawPlayer;
-    @SerializedName("player-uuid")
-    private final UUID playerUuid;
+    public Player rawPlayer;
     private EntityStats stats;
     public EntityInventory inv;
-    public transient EntityActionBar actionBar;
+    public EntityActionBar actionBar;
 
-    public CPlayer(RawLivingEntity livingEntity, RawEntity entity, EntityStats stats, EntityInventory inv, EntityActionBar actionBar) {
-        super( livingEntity, entity, stats, inv, actionBar);
-        assert livingEntity.raw instanceof Player;
-        this.rawPlayer = (Player) livingEntity.raw;
-        this.playerUuid = rawPlayer.getUniqueId();
+    public CPlayer(PlayerData data) {
+        super(
+                new EntityActionBar(
+                        data.stats.health,
+                        data.stats.defense,
+                        data.stats.mana
+                ),
+                data.inv,
+                data.stats,
+                new RawEntity(data.playerUUID)
+        );
+
+        this.rawPlayer = Bukkit.getPlayer(data.playerUUID);
+        this.stats = data.stats;
+        this.inv = data.inv;
+        this.actionBar = getComponent(EntityActionBar.class).unwrap();
+    }
+    public CPlayer(RawEntity entity, EntityStats stats, EntityInventory inv, EntityActionBar actionBar) {
+        super(actionBar, inv, stats, entity);
+        if (entity.getLivingEntity().isNone() && !(entity.getLivingEntity().unwrap() instanceof Player)) {
+            throw new IllegalArgumentException();
+        }
+        this.rawPlayer = (Player) entity.getEntity().unwrap();
         this.inv = inv;
         this.stats = stats;
         this.actionBar = actionBar;
@@ -55,21 +68,16 @@ public class CPlayer extends CEntity {
                 stats.health, stats.defense, stats.mana
         );
 
-        return new CPlayer(new RawLivingEntity(p), new RawEntity(p), stats, new EntityInventory(), actionBar);
+        return new CPlayer(new RawEntity(p.getUniqueId()), stats, new EntityInventory(), actionBar);
     }
 
-    @Override
-    public void initLoaded() {
-        rawPlayer = Bukkit.getPlayer(playerUuid);
-        inv.activeSlot = rawPlayer.getInventory().getHeldItemSlot();
-        inv.hasUpdated = true;
-        super.initLoaded();
-
-        addComponent(new RawLivingEntity(rawPlayer));
-        addComponent(new RawEntity(rawPlayer));
-        addComponent(inv);
-        addComponent(stats);
-        addComponent(new EntityActionBar(stats.health, stats.defense, stats.mana));
+    public PlayerData asData() {
+        return new PlayerData(
+                rawPlayer.getUniqueId(),
+                rawPlayer.getName(),
+                stats,
+                inv
+        );
     }
 
     public String getName() { return rawPlayer.getName(); }

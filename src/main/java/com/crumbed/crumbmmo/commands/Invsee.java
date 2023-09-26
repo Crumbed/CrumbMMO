@@ -2,7 +2,7 @@ package com.crumbed.crumbmmo.commands;
 
 import com.crumbed.crumbmmo.managers.ItemManager;
 import com.crumbed.crumbmmo.managers.PlayerManager;
-import com.crumbed.crumbmmo.entity.CPlayer;
+import com.crumbed.crumbmmo.ecs.CPlayer;
 import com.crumbed.crumbmmo.items.CItem;
 import com.crumbed.crumbmmo.utils.Option;
 import com.google.gson.Gson;

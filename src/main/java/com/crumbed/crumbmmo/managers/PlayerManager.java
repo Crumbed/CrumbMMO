@@ -1,11 +1,11 @@
 package com.crumbed.crumbmmo.managers;
 
 import com.crumbed.crumbmmo.CrumbMMO;
-import com.crumbed.crumbmmo.entity.CEntity;
-import com.crumbed.crumbmmo.entity.CPlayer;
-import com.crumbed.crumbmmo.entity.systems.PlayerInvUpdate;
+import com.crumbed.crumbmmo.ecs.CEntity;
+import com.crumbed.crumbmmo.ecs.CPlayer;
+import com.crumbed.crumbmmo.ecs.systems.PlayerInvUpdate;
 import com.crumbed.crumbmmo.items.CItem;
-import com.crumbed.crumbmmo.utils.JsonPlayerData;
+import com.crumbed.crumbmmo.serializable.JsonPlayerData;
 import com.crumbed.crumbmmo.utils.Option;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -30,9 +30,12 @@ public class PlayerManager {
     /**
      * Map from MC UUID -> Entity ID
      */
-    private HashMap<UUID, UUID> playerIds;
+    private HashMap<UUID, Integer> playerIds;
     private JsonPlayerData playerData;
-    private HashMap<UUID, Double> playerHealthScales;
+    /**
+     * Map form Entity ID -> Health scale
+     */
+    private HashMap<Integer, Double> playerHealthScales;
 
     private PlayerManager(CrumbMMO plugin) {
         playerIds = new HashMap<>();
@@ -54,7 +57,10 @@ public class PlayerManager {
         if (INSTANCE.isNone()) INSTANCE = Option.some(new PlayerManager(plugin));
     }
 
-    public HashMap<UUID, Double> getHealthScales() { return playerHealthScales; }
+    /**
+     * @return Map from Entity ID -> Health scale as Double
+     */
+    public HashMap<Integer, Double> getHealthScales() { return playerHealthScales; }
 
     public void addPlayer(final Player player) {
         CPlayer p;
@@ -64,6 +70,8 @@ public class PlayerManager {
         } else {
             p = playerData.loadPlayer(player.getUniqueId());
         }
+        EntityManager.INSTANCE
+                .addEntity(p);
 
         // Calculate player health scale
         double healthScale = p.getStats()
@@ -75,12 +83,7 @@ public class PlayerManager {
 
         manager.syncPlayerInv(p);
 
-        // Add player to EntityManager & playerIds
         playerIds.put(p.getUUID(), p.id);
-        EntityManager
-                .INSTANCE
-                .unwrap()
-                .addEntity(p);
     }
 
     /**
@@ -89,10 +92,11 @@ public class PlayerManager {
      * @return  Option.none otherwise
      */
     public Option<CPlayer> getPlayer(UUID uuid) {
+        Integer id = playerIds.get(uuid);
+        if (id == null) return Option.none();
         Option<CEntity> entity = EntityManager
                 .INSTANCE
-                .unwrap()
-                .getEntity(playerIds.get(uuid));
+                .getEntity(id);
 
         if (entity.isSome() && entity.unwrap() instanceof CPlayer) {
             return Option.some(
@@ -136,12 +140,19 @@ public class PlayerManager {
                 .stream()
                 .map(entId -> (CPlayer) EntityManager
                         .INSTANCE
-                        .unwrap()
                         .getEntity(entId)
                         .unwrap())
                 .distinct();
     }
 
+
+    public double[] syncPlayerInv(int entityId) {
+        CEntity e = EntityManager.INSTANCE
+                .getEntity(entityId)
+                .unwrap();
+
+        return syncPlayerInv((CPlayer) e);
+    }
     /**
      * Syncs the CPlayer EntityInventory component with the vanilla inventory
      *
@@ -193,11 +204,9 @@ public class PlayerManager {
 
     public void deloadPlayer(CPlayer p) {
         playerData.savePlayer(p);
-        UUID eid = playerIds.remove(p.getUUID());
-        EntityManager
-                .INSTANCE
-                .unwrap()
-                .removeEntity(eid);
+        int eid = playerIds.remove(p.getUUID());
+        EntityManager.INSTANCE
+                .killEntity(eid);
     }
 
     public void deloadPlayer(Player p) {

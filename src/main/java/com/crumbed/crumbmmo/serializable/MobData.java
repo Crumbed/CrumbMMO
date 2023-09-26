@@ -1,11 +1,11 @@
-package com.crumbed.crumbmmo.entity;
+package com.crumbed.crumbmmo.serializable;
 
 import com.crumbed.crumbmmo.CrumbMMO;
 import com.crumbed.crumbmmo.stats.GenericStat;
-import com.crumbed.crumbmmo.utils.JsonPlayerData;
 import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,7 +16,7 @@ import java.util.stream.Stream;
 
 public class MobData {
     @SerializedName("mob-types")
-    public final String mobTypes[];
+    public final String[] mobTypes;
     @SerializedName("vanilla-mobs")
     public final HashMap<EntityType, VanillaMob> vanillaMobs;
     @SerializedName("mob-variants")
@@ -44,7 +44,17 @@ public class MobData {
             return gson.fromJson(jsonMobData, MobData.class);
         } catch (IOException ignored){}
         return null;
+
     }
+
+    public void buffVanillaMob(LivingEntity e) {
+
+    }
+
+
+
+
+
 
 
     public static class MobVariant {
@@ -67,4 +77,15 @@ public class MobData {
             variants = new HashMap<>();
         }
     }
+
+
+
 }
+
+
+
+
+
+
+
+

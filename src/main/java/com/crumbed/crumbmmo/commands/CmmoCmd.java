@@ -1,7 +1,7 @@
 package com.crumbed.crumbmmo.commands;
 
 import com.crumbed.crumbmmo.managers.PlayerManager;
-import com.crumbed.crumbmmo.entity.CPlayer;
+import com.crumbed.crumbmmo.ecs.CPlayer;
 import com.crumbed.crumbmmo.stats.GenericStat;
 import com.crumbed.crumbmmo.utils.Option;
 import org.bukkit.Bukkit;

@@ -20,7 +20,6 @@ public class PlayerJoinAndLeave implements Listener {
         PlayerManager pm = PlayerManager
                 .INSTANCE
                 .unwrap();
-        if (pm.getPlayer(player).isSome()) { pm.getPlayer(player).unwrap().initLoaded(); return; }
         pm.addPlayer(player);
         plugin.getLogger().info("Added " + player.getName() + " to PlayerManager");
     }

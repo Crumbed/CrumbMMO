@@ -1,25 +1,27 @@
-package com.crumbed.crumbmmo.entity.systems;
+package com.crumbed.crumbmmo.ecs.systems;
 
-import com.crumbed.crumbmmo.entity.*;
-import com.crumbed.crumbmmo.entity.components.EntityInventory;
-import com.crumbed.crumbmmo.entity.components.EntityStats;
-import com.crumbed.crumbmmo.entity.components.RawLivingEntity;
+import com.crumbed.crumbmmo.ecs.*;
+import com.crumbed.crumbmmo.ecs.components.EntityInventory;
+import com.crumbed.crumbmmo.ecs.components.EntityStats;
+import com.crumbed.crumbmmo.ecs.components.RawEntity;
 import com.crumbed.crumbmmo.items.CItem;
 import com.crumbed.crumbmmo.managers.PlayerManager;
+import com.crumbed.crumbmmo.utils.Option;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.inventory.InventoryView;
 
 import java.util.Arrays;
 import java.util.UUID;
 import java.util.stream.Stream;
 
 public class PlayerInvUpdate extends EntitySystem implements Listener {
-
     public PlayerInvUpdate() {
-        super(5, EntityComponent.ComponentType.Stats, EntityComponent.ComponentType.RawLivingEntity, EntityComponent.ComponentType.Inventory);
+        super(5, new ComponentQuery(EntityStats.class, RawEntity.class, EntityInventory.class));
     }
 
     @EventHandler
@@ -32,13 +34,13 @@ public class PlayerInvUpdate extends EntitySystem implements Listener {
     }
 
     private void update(UUID playerUuid) {
-        CPlayer p = PlayerManager
+        Option<CPlayer> p = PlayerManager
                 .INSTANCE
                 .unwrap()
-                .getPlayer(playerUuid)
-                .unwrap();
+                .getPlayer(playerUuid);
+        if (p.isNone()) return;
 
-        p.inv.hasUpdated = true;
+        p.unwrap().inv.hasUpdated = true;
     }
 
     public static final int DAMAGE = 0;
@@ -50,30 +52,33 @@ public class PlayerInvUpdate extends EntitySystem implements Listener {
     public static final int MANA = 6;
 
     @Override
-    public void execute(Stream<CEntity> entities) {
-        entities.forEach(e -> {
-            EntityStats stats = (EntityStats) e
-                    .getComponent(EntityComponent.ComponentType.Stats)
+    public void execute(Stream<ComponentQuery.Result> results) {
+        results.forEach(r -> {
+            Option<LivingEntity> entity = r
+                    .getComponent(RawEntity.class)
+                    .unwrap()
+                    .getLivingEntity();
+            if (entity.isNone() || !(entity.unwrap() instanceof Player)) return;
+            Player player = (Player) entity.unwrap();
+
+            EntityStats stats = r
+                    .getComponent(EntityStats.class)
                     .unwrap();
-            EntityInventory inv = (EntityInventory) e
-                    .getComponent(EntityComponent.ComponentType.Inventory)
-                    .unwrap();
-            RawLivingEntity livingEntity = (RawLivingEntity) e
-                    .getComponent(EntityComponent.ComponentType.RawLivingEntity)
+            EntityInventory inv = r
+                    .getComponent(EntityInventory.class)
                     .unwrap();
 
-            Player rawPlayer = (Player) livingEntity.raw;
 
 
-            CItem activeItem = inv.inventory[rawPlayer.getInventory().getHeldItemSlot()];
+            CItem activeItem = inv.inventory[player.getInventory().getHeldItemSlot()];
             if (activeItem != null && !activeItem.equals(inv.inventory[inv.activeSlot]))
                 inv.hasUpdated = true;
 
             if (inv.hasUpdated) {
-                double swapStats[] = PlayerManager
+                double[] swapStats = PlayerManager
                         .INSTANCE
                         .unwrap()
-                        .syncPlayerInv((CPlayer) e);
+                        .syncPlayerInv(r.parentEntity);
 
                 inv.statBoosts.addAll(Arrays.asList(inv.armor));
                 inv.statBoosts.add(inv.inventory[inv.activeSlot]);

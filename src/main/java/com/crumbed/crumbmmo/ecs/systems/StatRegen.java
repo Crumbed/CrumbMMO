@@ -1,24 +1,26 @@
-package com.crumbed.crumbmmo.entity.systems;
+package com.crumbed.crumbmmo.ecs.systems;
 
-import com.crumbed.crumbmmo.entity.CEntity;
-import com.crumbed.crumbmmo.entity.EntityComponent;
-import com.crumbed.crumbmmo.entity.EntitySystem;
-import com.crumbed.crumbmmo.entity.components.EntityStats;
+import com.crumbed.crumbmmo.ecs.CEntity;
+import com.crumbed.crumbmmo.ecs.ComponentQuery;
+import com.crumbed.crumbmmo.ecs.EntityComponent;
+import com.crumbed.crumbmmo.ecs.EntitySystem;
+import com.crumbed.crumbmmo.ecs.components.EntityStats;
 import com.crumbed.crumbmmo.managers.StatManager;
+import org.bukkit.Bukkit;
 
 import java.util.stream.Stream;
 
 public class StatRegen extends EntitySystem {
     public StatRegen() {
-        super(20, EntityComponent.ComponentType.Stats);
+        super(20, new ComponentQuery(EntityStats.class));
     }
 
 
     @Override
-    public void execute(Stream<CEntity> entities) {
-        entities.forEach(e -> {
-            EntityStats stats = (EntityStats) e
-                    .getComponent(EntityComponent.ComponentType.Stats)
+    public void execute(Stream<ComponentQuery.Result> results) {
+        results.forEach(r -> {
+            EntityStats stats = r
+                    .getComponent(EntityStats.class)
                     .unwrap();
 
             // regen health
