@@ -10,8 +10,8 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class CEntity implements Composable {
-    public transient int id;
-    private transient final ArrayList<EntityComponent> components;
+    public int id;
+    private final ArrayList<EntityComponent> components;
 
     //IF YOU USE THIS CONSTRUCTOR MAKE SURE THE COMPONENTS ARE SORTED PROPERLY
     public CEntity(EntityComponent... comps) {

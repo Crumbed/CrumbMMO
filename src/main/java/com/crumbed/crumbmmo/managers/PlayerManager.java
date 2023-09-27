@@ -6,7 +6,9 @@ import com.crumbed.crumbmmo.ecs.CPlayer;
 import com.crumbed.crumbmmo.ecs.systems.PlayerInvUpdate;
 import com.crumbed.crumbmmo.items.CItem;
 import com.crumbed.crumbmmo.serializable.JsonPlayerData;
+import com.crumbed.crumbmmo.utils.None;
 import com.crumbed.crumbmmo.utils.Option;
+import com.crumbed.crumbmmo.utils.Some;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.bukkit.Bukkit;
@@ -26,7 +28,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class PlayerManager {
-    public static Option<PlayerManager> INSTANCE = Option.none();
+    public static PlayerManager INSTANCE = null;
     /**
      * Map from MC UUID -> Entity ID
      */
@@ -54,7 +56,7 @@ public class PlayerManager {
         } catch (IOException ignored){}
     }
     public static void init(CrumbMMO plugin) {
-        if (INSTANCE.isNone()) INSTANCE = Option.some(new PlayerManager(plugin));
+        if (INSTANCE == null) INSTANCE = new PlayerManager(plugin);
     }
 
     /**
@@ -77,11 +79,13 @@ public class PlayerManager {
         double healthScale = p.getStats()
                 .health
                 .calcHealthScale();
-        PlayerManager manager = PlayerManager.INSTANCE.unwrap();
-        manager.getHealthScales().put(p.id, healthScale);
+        PlayerManager.INSTANCE
+                .getHealthScales()
+                .put(p.id, healthScale);
         p.rawPlayer.setHealthScale(healthScale);
 
-        manager.syncPlayerInv(p);
+        PlayerManager.INSTANCE
+                .syncPlayerInv(p);
 
         playerIds.put(p.getUUID(), p.id);
     }
@@ -92,41 +96,43 @@ public class PlayerManager {
      * @return  Option.none otherwise
      */
     public Option<CPlayer> getPlayer(UUID uuid) {
-        Integer id = playerIds.get(uuid);
+        var id = playerIds.get(uuid);
         if (id == null) return Option.none();
-        Option<CEntity> entity = EntityManager
+        var entity = EntityManager
                 .INSTANCE
                 .getEntity(id);
 
-        if (entity.isSome() && entity.unwrap() instanceof CPlayer) {
-            return Option.some(
-                    (CPlayer) entity.unwrap()
-            );
-        }
-
-        return Option.none();
+        return switch (entity) {
+            case Some<CEntity> ent -> switch (ent.inner()) {
+                case CPlayer p -> Option.some(p);
+                default -> Option.none();
+            };
+            case None<CEntity> ignored -> Option.none();
+        };
     }
 
     /**
      * @param   player  Player
-     * @return  Option.some if CPlayer exists
-     * @return  Option.none otherwise
+     * @return  Some if CPlayer exists
+     * @return  None otherwise
      */
     public Option<CPlayer> getPlayer(Player player) {
-        if (player == null) return Option.none();
-        return getPlayer(player.getUniqueId());
+        return switch (player) {
+            case null -> Option.none();
+            default -> getPlayer(player.getUniqueId());
+        };
     }
 
     /**
      * @param   name  name of the Player
-     * @return  Option.some if CPlayer exists
-     * @return  Option.none otherwise
+     * @return  Some if CPlayer exists
+     * @return  None otherwise
      */
     public Option<CPlayer> getPlayer(String name) {
-        List<CPlayer> players = getPlayers()
+        var players = getPlayers()
                 .filter(p -> p.rawPlayer.getName()
                         .equalsIgnoreCase(name))
-                .collect(Collectors.toList());
+                .toList();
 
         if (players.isEmpty()) return Option.none();
         return Option.some(players.get(0));
@@ -147,7 +153,7 @@ public class PlayerManager {
 
 
     public double[] syncPlayerInv(int entityId) {
-        CEntity e = EntityManager.INSTANCE
+        var e = EntityManager.INSTANCE
                 .getEntity(entityId)
                 .unwrap();
 
@@ -160,17 +166,21 @@ public class PlayerManager {
      * @return  An array from the sum of all stat boosts
      */
     public double[] syncPlayerInv(CPlayer p) {
-        double[] swapStats = new double[7];
-        PlayerInventory inv = p.rawPlayer.getInventory();
-        ItemStack[] items = inv.getContents();
-        int heldItemSlot = inv.getHeldItemSlot();
-        for (int i = 0; i < items.length; i++) {
-            Option<CItem> item = CItem.fromItemStack(items[i]);
-            if (item.isNone()) {
+        var swapStats = new double[7];
+        var inv = p.rawPlayer.getInventory();
+        var items = inv.getContents();
+        var heldItemSlot = inv.getHeldItemSlot();
+        for (var i = 0; i < items.length; i++) {
+            var optItem = CItem.fromItemStack(items[i]);
+            CItem item;
+            if (optItem instanceof Some<CItem> some) {
+                item = some.inner();
+            } else {
                 p.rawPlayer.sendMessage(ChatColor.RED + "An unrecognised item was removed from your inventory, please contact staff if you believe this was a mistake.");
                 Bukkit.getLogger().info(items[i].getItemMeta().getDisplayName() + ", was removed from " + p.rawPlayer.getName() + "'s inventory.");
                 continue;
             }
+
             //Bukkit.getLogger().info(i + ": " + item.unwrap().getName());
             //Bukkit.getLogger().info("held slot: " + heldItemSlot);
 
@@ -183,9 +193,9 @@ public class PlayerManager {
                 swapStats[PlayerInvUpdate.DEFENSE] -= p.inv.inventory[p.inv.activeSlot].getStat("defense").getValue();
                 swapStats[PlayerInvUpdate.MANA] -= p.inv.inventory[p.inv.activeSlot].getStat("mana").getValue();
             }
-            if (i <= 35) p.inv.inventory[i] = item.unwrap();
+            if (i <= 35) p.inv.inventory[i] = item;
             else {
-                int index = i-36;
+                var index = i-36;
                 if (p.inv.armor[index] != null) {
                     swapStats[PlayerInvUpdate.DAMAGE] -= p.inv.armor[index].getStat("damage").getValue();
                     swapStats[PlayerInvUpdate.STRENGTH] -= p.inv.armor[index].getStat("strength").getValue();
@@ -195,7 +205,7 @@ public class PlayerManager {
                     swapStats[PlayerInvUpdate.DEFENSE] -= p.inv.armor[index].getStat("defense").getValue();
                     swapStats[PlayerInvUpdate.MANA] -= p.inv.armor[index].getStat("mana").getValue();
                 }
-                p.inv.armor[index] = item.unwrap();
+                p.inv.armor[index] = item;
             }
         }
         p.inv.activeSlot = heldItemSlot;
@@ -204,7 +214,7 @@ public class PlayerManager {
 
     public void deloadPlayer(CPlayer p) {
         playerData.savePlayer(p);
-        int eid = playerIds.remove(p.getUUID());
+        var eid = playerIds.remove(p.getUUID());
         EntityManager.INSTANCE
                 .killEntity(eid);
     }
@@ -215,14 +225,14 @@ public class PlayerManager {
 
     public void writeData(CrumbMMO plugin) {
         getPlayers()
-                .collect(Collectors.toList())
+                .toList()
                 .forEach(this::deloadPlayer);
 
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        String jsonPlayerData = gson.toJson(playerData);
+        var gson = new GsonBuilder().setPrettyPrinting().create();
+        var jsonPlayerData = gson.toJson(playerData);
 
         try {
-            FileWriter f = new FileWriter(new File(plugin.getDataFolder(), "PlayerData.json"));
+            var f = new FileWriter(new File(plugin.getDataFolder(), "PlayerData.json"));
             f.write(jsonPlayerData);
             f.close();
         } catch (IOException e) { e.printStackTrace(); }

@@ -28,7 +28,6 @@ public class Invsee extends CustomCommand {
 
         Option<CPlayer> player_opt = PlayerManager
                 .INSTANCE
-                .unwrap()
                 .getPlayer(args[0]);
         if (player_opt.isNone()) {
             sender.sendMessage(ChatColor.RED + "Error: Could not find player with name: " + args[0]);

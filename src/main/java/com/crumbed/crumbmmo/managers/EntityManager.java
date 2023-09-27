@@ -7,8 +7,10 @@ import com.crumbed.crumbmmo.ecs.EntityComponent;
 import com.crumbed.crumbmmo.ecs.EntitySystem;
 import com.crumbed.crumbmmo.ecs.components.EntityActionBar;
 import com.crumbed.crumbmmo.ecs.systems.StatRegen;
+import com.crumbed.crumbmmo.serializable.MobData;
 import com.crumbed.crumbmmo.utils.Option;
 import org.bukkit.Bukkit;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
@@ -30,10 +32,12 @@ public class EntityManager {
      * All registered systems
      */
     private final ArrayList<EntitySystem> systems;
+    private static MobData MOB_DATA = null;
 
-    private EntityManager(ArrayList<EntitySystem> systems) {
+    private EntityManager(ArrayList<EntitySystem> systems, CrumbMMO p) {
         entities = new ArrayList<>();
         this.systems = systems;
+        MOB_DATA = MobData.loadMobData(p);
     }
 
 
@@ -42,11 +46,11 @@ public class EntityManager {
             if (entities.get(i) != null) continue;
             entities.set(i, entity);
             entity.id = i;
-            Bukkit.getLogger().info("Added entity with id: " + i);
+            //Bukkit.getLogger().info("Added entity with id: " + i);
             return;
         }
 
-        Bukkit.getLogger().info("Added entity with id: " + entities.size());
+        //Bukkit.getLogger().info("Added entity with id: " + entities.size());
         entity.id = entities.size();
         entities.add(entity);
     }
@@ -95,6 +99,7 @@ public class EntityManager {
         }.runTaskTimer(plugin, 0, 1);
     }
 
+    public static MobData getMobData() { return MOB_DATA; }
     public boolean containsEntity(int id) {
         return entities.get(id) != null;
     }
@@ -103,10 +108,12 @@ public class EntityManager {
     public static class Builder {
         private ArrayList<EntitySystem> systems;
         private int componentCount;
+        private CrumbMMO p;
 
-        public Builder() {
+        public Builder(CrumbMMO p) {
             systems = new ArrayList<>();
             componentCount = 0;
+            this.p = p;
         }
 
         public Builder withSystem(EntitySystem sys) {
@@ -125,9 +132,7 @@ public class EntityManager {
             return this;
         }
 
-        public EntityManager create() {
-            return new EntityManager(systems);
-        }
+        public EntityManager create() { return new EntityManager(systems, p); }
     }
 }
 

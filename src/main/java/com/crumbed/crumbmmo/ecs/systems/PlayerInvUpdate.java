@@ -36,7 +36,6 @@ public class PlayerInvUpdate extends EntitySystem implements Listener {
     private void update(UUID playerUuid) {
         Option<CPlayer> p = PlayerManager
                 .INSTANCE
-                .unwrap()
                 .getPlayer(playerUuid);
         if (p.isNone()) return;
 
@@ -77,7 +76,6 @@ public class PlayerInvUpdate extends EntitySystem implements Listener {
             if (inv.hasUpdated) {
                 double[] swapStats = PlayerManager
                         .INSTANCE
-                        .unwrap()
                         .syncPlayerInv(r.parentEntity);
 
                 inv.statBoosts.addAll(Arrays.asList(inv.armor));

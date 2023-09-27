@@ -26,7 +26,6 @@ public class CmmoCmd extends CustomCommand {
             String ign = args[0];
             Option<CPlayer> optPlayer = PlayerManager
                     .INSTANCE
-                    .unwrap()
                     .getPlayer(Bukkit.getPlayer(ign));
 
             if (optPlayer.isNone()) {
@@ -39,7 +38,6 @@ public class CmmoCmd extends CustomCommand {
             Player rawPlayer = (Player) sender;
             Option<CPlayer> optPlayer = PlayerManager
                     .INSTANCE
-                    .unwrap()
                     .getPlayer(rawPlayer);
 
             if (optPlayer.isNone()) {
@@ -84,7 +82,6 @@ public class CmmoCmd extends CustomCommand {
 
         Option<CPlayer> optPlayer = PlayerManager
                 .INSTANCE
-                .unwrap()
                 .getPlayer(Bukkit.getPlayer(args[2]));
 
         if (optPlayer.isNone()) {
@@ -111,7 +108,6 @@ public class CmmoCmd extends CustomCommand {
 
         Option<CPlayer> optPlayer = PlayerManager
                 .INSTANCE
-                .unwrap()
                 .getPlayer(Bukkit.getPlayer(args[1]));
 
         if (optPlayer.isNone()) {

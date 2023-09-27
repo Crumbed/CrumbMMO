@@ -33,7 +33,6 @@ public class ComponentQuery {
             int index = Composable.binarySearch(collected, id);
             if (index < 0) return new Result();
 
-            Bukkit.getLogger().info("query picked component at: " + index + ", with id: " + id);
             comps.add(collected.get(index));
         }
 

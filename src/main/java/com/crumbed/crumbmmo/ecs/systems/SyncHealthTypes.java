@@ -4,10 +4,12 @@ import com.crumbed.crumbmmo.ecs.CEntity;
 import com.crumbed.crumbmmo.ecs.ComponentQuery;
 import com.crumbed.crumbmmo.ecs.EntityComponent;
 import com.crumbed.crumbmmo.ecs.EntitySystem;
+import com.crumbed.crumbmmo.ecs.components.EntityName;
 import com.crumbed.crumbmmo.ecs.components.RawEntity;
 import com.crumbed.crumbmmo.managers.PlayerManager;
 import com.crumbed.crumbmmo.ecs.components.EntityStats;
 import com.crumbed.crumbmmo.utils.Option;
+import org.bukkit.Bukkit;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -25,6 +27,9 @@ public class SyncHealthTypes extends EntitySystem {
     @Override
     public void execute(Stream<ComponentQuery.Result> results) {
         results.forEach(r -> {
+            Option<EntityName> name = r
+                    .getComponent(EntityName.class);
+            if (name.isSome()) Bukkit.getLogger().info(name.unwrap().name);
             Option<LivingEntity> entity = r
                     .getComponent(RawEntity.class)
                     .unwrap()
@@ -46,7 +51,6 @@ public class SyncHealthTypes extends EntitySystem {
                     Player p = (Player) raw;
                     HashMap<Integer, Double> healthScales = PlayerManager
                             .INSTANCE
-                            .unwrap()
                             .getHealthScales();
                     if (healthScales.containsKey(p.getUniqueId()) && !healthScales.get(p.getUniqueId()).equals(healthScale)) {
                         healthScales.put(r.parentEntity, healthScale);

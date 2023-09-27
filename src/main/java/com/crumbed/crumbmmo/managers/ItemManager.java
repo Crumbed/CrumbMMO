@@ -136,14 +136,12 @@ public class ItemManager {
                 if (inv instanceof PlayerInventory) {
                     CPlayer player = PlayerManager
                             .INSTANCE
-                            .unwrap()
                             .getPlayer(((PlayerInventory) inv)
                                     .getHolder()
                                     .getUniqueId())
                             .unwrap();
                     PlayerManager
                             .INSTANCE
-                            .unwrap()
                             .syncPlayerInv(player);
                 }
             }
