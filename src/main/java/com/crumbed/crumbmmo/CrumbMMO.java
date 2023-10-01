@@ -10,6 +10,7 @@ import com.crumbed.crumbmmo.commands.CustomCommand;
 import com.crumbed.crumbmmo.ecs.components.*;
 import com.crumbed.crumbmmo.ecs.systems.*;
 import com.crumbed.crumbmmo.genericEvents.ChunkLoad;
+import com.crumbed.crumbmmo.genericEvents.EntityDamage;
 import com.crumbed.crumbmmo.genericEvents.MobSpawn;
 import com.crumbed.crumbmmo.serializable.MobData;
 import com.crumbed.crumbmmo.managers.EntityManager;
@@ -29,6 +30,7 @@ import org.checkerframework.checker.units.qual.C;
 import org.reflections.Reflections;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Objects;
 import java.util.UUID;
 
 import static com.crumbed.crumbmmo.utils.Namespaces.MOB_ID;
@@ -74,6 +76,7 @@ public final class CrumbMMO extends JavaPlugin {
         pm.registerEvents(new PlayerInvUpdate(), this);
         pm.registerEvents(new MobSpawn(), this);
         pm.registerEvents(new ChunkLoad(), this);
+        pm.registerEvents(new EntityDamage(), this);
 
         // Gaming for auto register commands
         Reflections classes = new Reflections("com.crumbed.crumbmmo.commands");
@@ -98,6 +101,7 @@ public final class CrumbMMO extends JavaPlugin {
         PlayerManager.INSTANCE.writeData(this);
         EntityManager.INSTANCE
                 .getEntities()
+                .filter(Objects::nonNull)
                 .map(e -> e.id)
                 .forEach(id -> EntityManager.INSTANCE.killEntity(id));
         EntityManager.getMobData().saveMobData(this);
