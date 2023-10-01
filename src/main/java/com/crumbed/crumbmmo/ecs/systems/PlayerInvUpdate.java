@@ -53,12 +53,11 @@ public class PlayerInvUpdate extends EntitySystem implements Listener {
     @Override
     public void execute(Stream<ComponentQuery.Result> results) {
         results.forEach(r -> {
-            Option<LivingEntity> entity = r
+            var entity = r
                     .getComponent(RawEntity.class)
                     .unwrap()
-                    .getLivingEntity();
-            if (entity.isNone() || !(entity.unwrap() instanceof Player)) return;
-            Player player = (Player) entity.unwrap();
+                    .getLivingEntity(r.parentEntity);
+            if (entity.isNone() || !(entity.unwrap() instanceof Player player)) return;
 
             EntityStats stats = r
                     .getComponent(EntityStats.class)

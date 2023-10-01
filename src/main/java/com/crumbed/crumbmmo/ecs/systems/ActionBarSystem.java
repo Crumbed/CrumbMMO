@@ -23,16 +23,15 @@ public class ActionBarSystem extends EntitySystem {
     @Override
     public void execute(Stream<ComponentQuery.Result> results){
         results.forEach(r -> {
-            EntityActionBar bar = r
+            var bar = r
                     .getComponent(EntityActionBar.class)
                     .unwrap();
 
-            Option<LivingEntity> e = r
+            var e = r
                     .getComponent(RawEntity.class)
                     .unwrap()
-                    .getLivingEntity();
-            if (e.isNone() && !(e.unwrap() instanceof Player)) return;
-            Player p = (Player) e.unwrap();
+                    .getLivingEntity(r.parentEntity);
+            if (e.isNone() || !(e.unwrap() instanceof Player p)) return;
 
             p.spigot().sendMessage(ChatMessageType.ACTION_BAR, bar.getActionBar());
         });

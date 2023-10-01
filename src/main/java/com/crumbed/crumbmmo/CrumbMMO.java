@@ -2,14 +2,11 @@ package com.crumbed.crumbmmo;
 
 import com.crumbed.crumbmmo.commands.CustomCommand;
 import com.crumbed.crumbmmo.ecs.components.*;
+import com.crumbed.crumbmmo.ecs.systems.*;
 import com.crumbed.crumbmmo.genericEvents.ChunkLoad;
 import com.crumbed.crumbmmo.genericEvents.MobSpawn;
 import com.crumbed.crumbmmo.serializable.MobData;
-import com.crumbed.crumbmmo.ecs.systems.ActionBarSystem;
-import com.crumbed.crumbmmo.ecs.systems.StatRegen;
-import com.crumbed.crumbmmo.ecs.systems.SyncHealthTypes;
 import com.crumbed.crumbmmo.managers.EntityManager;
-import com.crumbed.crumbmmo.ecs.systems.PlayerInvUpdate;
 import com.crumbed.crumbmmo.managers.PlayerManager;
 import com.crumbed.crumbmmo.genericEvents.PlayerJoinAndLeave;
 import com.crumbed.crumbmmo.managers.ItemManager;
@@ -43,10 +40,12 @@ public final class CrumbMMO extends JavaPlugin {
                 .withComponent(EntityStats.class)
                 .withComponent(RawEntity.class)
                 .withComponent(EntityName.class)
+                //.withComponent(NameTag.class)
                 .withSystem(new ActionBarSystem())
                 .withSystem(new PlayerInvUpdate())
                 .withSystem(new StatRegen())
                 .withSystem(new SyncHealthTypes())
+                //.withSystem(new SyncNameTag())
                 .create();
         PlayerManager.init(this);
         MobData.loadMobData(this);

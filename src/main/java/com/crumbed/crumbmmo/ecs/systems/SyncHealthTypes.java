@@ -27,29 +27,29 @@ public class SyncHealthTypes extends EntitySystem {
     @Override
     public void execute(Stream<ComponentQuery.Result> results) {
         results.forEach(r -> {
-            Option<EntityName> name = r
+            var name = r
                     .getComponent(EntityName.class);
             if (name.isSome()) Bukkit.getLogger().info(name.unwrap().name);
-            Option<LivingEntity> entity = r
+            var entity = r
                     .getComponent(RawEntity.class)
                     .unwrap()
-                    .getLivingEntity();
+                    .getLivingEntity(r.parentEntity);
             if (entity.isNone()) return;
-            LivingEntity raw = entity.unwrap();
+            var raw = entity.unwrap();
 
-            EntityStats stats = r
+            var stats = r
                     .getComponent(EntityStats.class)
                     .unwrap();
 
             // Sync raw player max health & health scale with custom values
             if (raw.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue() != stats.health.getBaseValue()) {
-                double healthScale = stats.health.calcHealthScale();
+                var healthScale = stats.health.calcHealthScale();
                 raw.getAttribute(Attribute.GENERIC_MAX_HEALTH)
                         .setBaseValue(stats.health.getBaseValue());
 
                 if (raw instanceof Player) {
-                    Player p = (Player) raw;
-                    HashMap<Integer, Double> healthScales = PlayerManager
+                    var p = (Player) raw;
+                    var healthScales = PlayerManager
                             .INSTANCE
                             .getHealthScales();
                     if (healthScales.containsKey(p.getUniqueId()) && !healthScales.get(p.getUniqueId()).equals(healthScale)) {

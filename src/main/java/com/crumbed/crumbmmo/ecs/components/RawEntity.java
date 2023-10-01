@@ -1,6 +1,7 @@
 package com.crumbed.crumbmmo.ecs.components;
 
 import com.crumbed.crumbmmo.ecs.EntityComponent;
+import com.crumbed.crumbmmo.managers.EntityManager;
 import com.crumbed.crumbmmo.utils.Option;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
@@ -18,20 +19,27 @@ public class RawEntity extends EntityComponent {
         this.id = rawId;
     }
 
-    public Option<Entity> getEntity() {
+    public Option<Entity> getEntity(int entityId) {
         Entity e = Bukkit.getEntity(id);
-
-        return (e == null)
-                ? Option.none()
-                : Option.some(e);
+        if (e == null) {
+            EntityManager.INSTANCE
+                    .getEntity(entityId);
+            return Option.none();
+        }
+        return Option.some(e);
     }
 
-    public Option<LivingEntity> getLivingEntity() {
+    public Option<LivingEntity> getLivingEntity(int entityId) {
         Entity e = Bukkit.getEntity(id);
+        if (e == null) {
+            EntityManager.INSTANCE
+                    .getEntity(entityId);
+            return Option.none();
+        }
 
-        if (e == null) return Option.none();
-        else if (e instanceof LivingEntity)
-            return Option.some((LivingEntity) e);
-        return Option.none();
+        return switch (e) {
+            case LivingEntity living -> Option.some(living);
+            case default -> Option.none();
+        };
     }
 }
