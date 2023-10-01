@@ -1,6 +1,7 @@
 name: CrumbMMO
 version: '${project.version}'
 main: com.crumbed.crumbmmo.CrumbMMO
+depend: [ ProtocolLib ]
 api-version: '1.20'
 commands:
   cdebug:

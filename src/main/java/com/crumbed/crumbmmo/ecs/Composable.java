@@ -29,6 +29,7 @@ public interface Composable {
 
     static int binarySearch(ArrayList<EntityComponent> comps, int targetId) {
         int l = 0, r = comps.size() - 1;
+        if (comps.get(r).id() == targetId) return r;
         while (l <= r) {
             int m = l + (r - 1) / 2;
 

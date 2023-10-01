@@ -36,12 +36,9 @@ public class CPlayer extends CEntity {
         this.inv = data.inv;
         this.actionBar = getComponent(EntityActionBar.class).unwrap();
     }
-    public CPlayer(RawEntity entity, EntityStats stats, EntityInventory inv, EntityActionBar actionBar) {
+    public CPlayer(Player p, RawEntity entity, EntityStats stats, EntityInventory inv, EntityActionBar actionBar) {
         super(actionBar, inv, stats, entity);
-        if (entity.getLivingEntity().isNone() && !(entity.getLivingEntity().unwrap() instanceof Player)) {
-            throw new IllegalArgumentException();
-        }
-        this.rawPlayer = (Player) entity.getEntity().unwrap();
+        this.rawPlayer = p;
         this.inv = inv;
         this.stats = stats;
         this.actionBar = actionBar;
@@ -68,7 +65,7 @@ public class CPlayer extends CEntity {
                 stats.health, stats.defense, stats.mana
         );
 
-        return new CPlayer(new RawEntity(p.getUniqueId()), stats, new EntityInventory(), actionBar);
+        return new CPlayer(p, new RawEntity(p.getUniqueId()), stats, new EntityInventory(), actionBar);
     }
 
     public PlayerData asData() {

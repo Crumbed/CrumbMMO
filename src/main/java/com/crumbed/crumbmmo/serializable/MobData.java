@@ -2,12 +2,9 @@ package com.crumbed.crumbmmo.serializable;
 
 import com.crumbed.crumbmmo.CrumbMMO;
 import com.crumbed.crumbmmo.ecs.CEntity;
-import com.crumbed.crumbmmo.ecs.components.EntityName;
-import com.crumbed.crumbmmo.ecs.components.NameTag;
-import com.crumbed.crumbmmo.ecs.components.RawEntity;
+import com.crumbed.crumbmmo.ecs.components.*;
 import com.crumbed.crumbmmo.managers.EntityManager;
 import com.crumbed.crumbmmo.stats.*;
-import com.crumbed.crumbmmo.ecs.components.EntityStats;
 import com.crumbed.crumbmmo.utils.None;
 import com.crumbed.crumbmmo.utils.Option;
 import com.crumbed.crumbmmo.utils.Some;
@@ -17,10 +14,10 @@ import com.google.gson.annotations.SerializedName;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.attribute.Attribute;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.TextDisplay;
+import org.bukkit.entity.*;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.util.Transformation;
+import org.joml.Matrix4f;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -88,13 +85,13 @@ public class MobData {
         }
 
         var entitiyData = entity.getPersistentDataContainer();
-        var levelMult = (level - vanillaMob.baseLevel) * 0.02;
+        var levelMult = (level - vanillaMob.baseLevel) * 0.35 + 1;
         var stats = new EntityStats(
-                new Damage(vanillaMob.stats.get(GenericStat.Damage) + levelMult),
+                new Damage(vanillaMob.stats.get(GenericStat.Damage) * levelMult),
                 new Strength(0D),
                 new CritDamage(0D),
                 new CritChance(0D),
-                new Health(vanillaMob.stats.get(GenericStat.Health) + levelMult),
+                new Health(vanillaMob.stats.get(GenericStat.Health) * levelMult),
                 new Defense(0D),
                 new Mana(0D)
         );
@@ -102,19 +99,35 @@ public class MobData {
             case Some<String> s -> s.inner();
             case None<String> ignored -> entity.getName();
         };
-        //var tag = entity.getWorld().spawn(entity.getEyeLocation(), TextDisplay.class);
-        //tag.setText(String.format(
-        //        "%s[Lv%d] %s",
-        //        ChatColor.GRAY,
-        //        level, entName
-        //));
-        //tag.setAlignment(TextDisplay.TextAlignment.CENTER);
+        var healthTag = entity.getWorld().spawn(entity.getEyeLocation(), TextDisplay.class);
+        healthTag.setShadowed(true);
+        healthTag.setAlignment(TextDisplay.TextAlignment.CENTER);
+        healthTag.setBillboard(Display.Billboard.VERTICAL);
+        healthTag.setTransformationMatrix(new Matrix4f(
+                1f,0f,0f,0f,0f,1f,0f,0f,0f,0f,1f,0f,0f,0.7f,0f,1f
+        ));
 
+        var tag = entity.getWorld().spawn(entity.getEyeLocation(), TextDisplay.class);
+        tag.setText(String.format(
+                "%s[Lv%d] %s",
+                ChatColor.GRAY,
+                level, entName));
+        tag.setShadowed(true);
+        tag.setAlignment(TextDisplay.TextAlignment.CENTER);
+        tag.setBillboard(Display.Billboard.VERTICAL);
+        tag.setTransformationMatrix(new Matrix4f(
+                1f,0f,0f,0f,0f,1f,0f,0f,0f,0f,1f,0f,0f,1f,0f,1f
+        ));
+
+        entity.getPassengers().forEach(Entity::remove);
+        entity.addPassenger(tag);
+        entity.addPassenger(healthTag);
         var newEnt = new CEntity.Builder()
                 .with(stats)
                 .with(new EntityName(entName))
                 .with(new RawEntity(entity.getUniqueId()))
-                //.with(new NameTag(tag))
+                .with(new NameTag(tag))
+                .with(new HealthTag(healthTag))
                 .create(EntityManager.INSTANCE);
 
         entitiyData.set(MOB_LEVEL, PersistentDataType.INTEGER, level);

@@ -2,12 +2,15 @@ package com.crumbed.crumbmmo.ecs;
 
 import com.crumbed.crumbmmo.managers.EntityManager;
 import com.crumbed.crumbmmo.utils.Option;
+import org.bukkit.Bukkit;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import static java.util.Arrays.stream;
 
 public class CEntity implements Composable {
     public int id;

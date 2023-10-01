@@ -1,5 +1,11 @@
 package com.crumbed.crumbmmo;
 
+import com.comphenix.protocol.PacketType;
+import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.ProtocolManager;
+import com.comphenix.protocol.events.ListenerPriority;
+import com.comphenix.protocol.events.PacketAdapter;
+import com.comphenix.protocol.events.PacketEvent;
 import com.crumbed.crumbmmo.commands.CustomCommand;
 import com.crumbed.crumbmmo.ecs.components.*;
 import com.crumbed.crumbmmo.ecs.systems.*;
@@ -12,22 +18,33 @@ import com.crumbed.crumbmmo.genericEvents.PlayerJoinAndLeave;
 import com.crumbed.crumbmmo.managers.ItemManager;
 import com.crumbed.crumbmmo.managers.StatManager;
 import com.crumbed.crumbmmo.utils.Namespaces;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.util.Vector;
+import org.checkerframework.checker.units.qual.C;
 import org.reflections.Reflections;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.UUID;
 
+import static com.crumbed.crumbmmo.utils.Namespaces.MOB_ID;
 import static org.reflections.scanners.Scanners.SubTypes;
 
 
 public final class CrumbMMO extends JavaPlugin {
     private static UUID SESSION_ID;
+    private static ProtocolManager PROTOCOL_MANAGER;
+    private static CrumbMMO INSTANCE;
 
     @Override
     public void onEnable() {
         SESSION_ID = UUID.randomUUID();
+        PROTOCOL_MANAGER = ProtocolLibrary.getProtocolManager();
+        INSTANCE = this;
         saveDefaultConfig();
         PluginManager pm = this.getServer().getPluginManager();
         Namespaces.initNamespaces(this);
@@ -40,12 +57,14 @@ public final class CrumbMMO extends JavaPlugin {
                 .withComponent(EntityStats.class)
                 .withComponent(RawEntity.class)
                 .withComponent(EntityName.class)
-                //.withComponent(NameTag.class)
+                .withComponent(NameTag.class)
+                .withComponent(HealthTag.class)
                 .withSystem(new ActionBarSystem())
                 .withSystem(new PlayerInvUpdate())
                 .withSystem(new StatRegen())
                 .withSystem(new SyncHealthTypes())
-                //.withSystem(new SyncNameTag())
+                .withSystem(new EntityGC())
+                .withSystem(new SyncHealthTag())
                 .create();
         PlayerManager.init(this);
         MobData.loadMobData(this);
@@ -77,6 +96,10 @@ public final class CrumbMMO extends JavaPlugin {
     @Override
     public void onDisable() {
         PlayerManager.INSTANCE.writeData(this);
+        EntityManager.INSTANCE
+                .getEntities()
+                .map(e -> e.id)
+                .forEach(id -> EntityManager.INSTANCE.killEntity(id));
         EntityManager.getMobData().saveMobData(this);
         // Plugin shutdown logic
     }
@@ -84,5 +107,7 @@ public final class CrumbMMO extends JavaPlugin {
 
 
     public static UUID getSessionId() { return SESSION_ID; }
+    public static ProtocolManager getProtocol() { return PROTOCOL_MANAGER; }
+    public static CrumbMMO getInstance() { return INSTANCE; }
 }
 

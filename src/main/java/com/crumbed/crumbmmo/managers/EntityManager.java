@@ -6,9 +6,12 @@ import com.crumbed.crumbmmo.ecs.ComponentQuery;
 import com.crumbed.crumbmmo.ecs.EntityComponent;
 import com.crumbed.crumbmmo.ecs.EntitySystem;
 import com.crumbed.crumbmmo.ecs.components.EntityActionBar;
+import com.crumbed.crumbmmo.ecs.components.HealthTag;
+import com.crumbed.crumbmmo.ecs.components.NameTag;
 import com.crumbed.crumbmmo.ecs.systems.StatRegen;
 import com.crumbed.crumbmmo.serializable.MobData;
 import com.crumbed.crumbmmo.utils.Option;
+import com.crumbed.crumbmmo.utils.Some;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -63,6 +66,14 @@ public class EntityManager {
             ));
             return;
         }
+        var ent = entities.get(id);
+        if (ent.getComponent(NameTag.class) instanceof Some<NameTag> s) {
+            s.inner().tag.remove();
+        }
+        if (ent.getComponent(HealthTag.class) instanceof Some<HealthTag> s) {
+            s.inner().tag.remove();
+        }
+
         entities.set(id, null);
     }
 
