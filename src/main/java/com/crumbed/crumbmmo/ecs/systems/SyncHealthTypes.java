@@ -2,20 +2,15 @@ package com.crumbed.crumbmmo.ecs.systems;
 
 import com.crumbed.crumbmmo.ecs.CEntity;
 import com.crumbed.crumbmmo.ecs.ComponentQuery;
-import com.crumbed.crumbmmo.ecs.EntityComponent;
 import com.crumbed.crumbmmo.ecs.EntitySystem;
 import com.crumbed.crumbmmo.ecs.components.EntityName;
 import com.crumbed.crumbmmo.ecs.components.RawEntity;
 import com.crumbed.crumbmmo.managers.PlayerManager;
 import com.crumbed.crumbmmo.ecs.components.EntityStats;
-import com.crumbed.crumbmmo.utils.Option;
 import org.bukkit.Bukkit;
 import org.bukkit.attribute.Attribute;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
-import java.util.HashMap;
-import java.util.UUID;
 import java.util.stream.Stream;
 
 public class SyncHealthTypes extends EntitySystem {
@@ -36,6 +31,7 @@ public class SyncHealthTypes extends EntitySystem {
                     .getLivingEntity(r.parentEntity);
             if (entity.isNone()) return;
             var raw = entity.unwrap();
+            if (raw.isDead()) return;
 
             var stats = r
                     .getComponent(EntityStats.class)

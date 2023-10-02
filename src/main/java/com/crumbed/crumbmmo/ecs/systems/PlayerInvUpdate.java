@@ -11,6 +11,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.inventory.InventoryView;
@@ -32,6 +33,8 @@ public class PlayerInvUpdate extends EntitySystem implements Listener {
     public void onInvClose(InventoryCloseEvent e) {
         update(e.getPlayer().getUniqueId());
     }
+    @EventHandler
+    public void onDeath(PlayerDeathEvent e) { update(e.getEntity().getUniqueId()); }
 
     private void update(UUID playerUuid) {
         Option<CPlayer> p = PlayerManager
@@ -68,8 +71,7 @@ public class PlayerInvUpdate extends EntitySystem implements Listener {
 
 
 
-            CItem activeItem = inv.inventory[player.getInventory().getHeldItemSlot()];
-            if (activeItem != null && !activeItem.equals(inv.inventory[inv.activeSlot]))
+            if (inv.activeSlot != player.getInventory().getHeldItemSlot())
                 inv.hasUpdated = true;
 
             if (inv.hasUpdated) {

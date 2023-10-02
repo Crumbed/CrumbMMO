@@ -8,16 +8,15 @@ import com.crumbed.crumbmmo.managers.TimerManager;
 import com.crumbed.crumbmmo.stats.DamageType;
 import com.crumbed.crumbmmo.stats.DamageValue;
 import com.crumbed.crumbmmo.utils.Option;
+import com.crumbed.crumbmmo.utils.Some;
 import com.crumbed.crumbmmo.utils.Timeable;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.entity.Display;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.TextDisplay;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.util.Vector;
 
 import java.util.Objects;
@@ -27,10 +26,12 @@ public class EntityDamage implements Listener {
 
     @EventHandler
     public void onEntityDamage(EntityDamageByEntityEvent e) {
-        var damager = EntityManager
+        var optDamager = EntityManager
                 .INSTANCE
-                .getEntity(e.getDamager())
-                .unwrap();
+                .getEntity(e.getDamager());
+        if (optDamager.isNone()) return;
+        var damager = optDamager.unwrap();
+
         var optDamagee = EntityManager
                 .INSTANCE
                 .getEntity(e.getEntity());
@@ -65,6 +66,26 @@ public class EntityDamage implements Listener {
         e.setDamage(damage.getDamage());
     }
 
+    @EventHandler
+    public void onEntityFall(EntityDamageEvent e) {
+        if (e.getCause() != EntityDamageEvent.DamageCause.FALL) return;
+        var damage = new DamageValue((int) e.getDamage() * 5, false, DamageType.Fall);
+        if (!(e.getEntity() instanceof LivingEntity entity) || e.getEntity() instanceof ArmorStand) return;
+        var optEnt = EntityManager.INSTANCE.getEntity(entity);
+        if (optEnt.isNone()) return;
+        var ent = optEnt.unwrap();
+
+        var stats = ent.getComponent(EntityStats.class);
+        if (!(stats instanceof Some<EntityStats> entStats)) return;
+        entStats.inner().damage(damage);
+
+        attackIndicator(damage, entity);
+        if (entity.getHealth() <= damage.getDamage()) {
+            e.setDamage(entity.getHealth());
+            return;
+        }
+        e.setDamage(damage.getDamage());
+    }
 
 
 

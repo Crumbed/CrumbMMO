@@ -3,9 +3,7 @@ package com.crumbed.crumbmmo;
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
-import com.comphenix.protocol.events.ListenerPriority;
-import com.comphenix.protocol.events.PacketAdapter;
-import com.comphenix.protocol.events.PacketEvent;
+import com.comphenix.protocol.events.*;
 import com.crumbed.crumbmmo.commands.CustomCommand;
 import com.crumbed.crumbmmo.ecs.components.*;
 import com.crumbed.crumbmmo.ecs.systems.*;
@@ -15,8 +13,10 @@ import com.crumbed.crumbmmo.serializable.MobData;
 import com.crumbed.crumbmmo.utils.Namespaces;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Particle;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.Vector;
@@ -73,6 +73,19 @@ public final class CrumbMMO extends JavaPlugin {
         pm.registerEvents(new ChunkLoad(), this);
         pm.registerEvents(new EntityDamage(), this);
         pm.registerEvents(new PlayerRespawn(), this);
+
+        getProtocol().addPacketListener(new PacketAdapter(
+                this,
+                ListenerPriority.NORMAL,
+                PacketType.Play.Server.WORLD_PARTICLES
+        ) {
+            @Override
+            public void onPacketSending(PacketEvent event) {
+                var packet = event.getPacket();
+                var packetId = packet.getIntegers().read(0);
+                if (packetId == 24 || packetId == 0) event.setCancelled(true);
+            }
+        });
 
         // Gaming for auto register commands
         Reflections classes = new Reflections("com.crumbed.crumbmmo.commands");

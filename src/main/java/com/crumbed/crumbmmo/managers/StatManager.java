@@ -43,7 +43,8 @@ public class StatManager {
         };
 
         if (Math.random() <= critChance.getValue() && cooldown > 0.8)
-            return new DamageValue((int) (initDmg * (1 + (critDamage.getValue() / 100))), true, dt);
+            return new DamageValue((int) (initDmg * (1 + critDamage.getValue())), true, dt);
+        else if (cooldown < 0.5) initDmg /= 2;
         return new DamageValue(initDmg, false, dt);
     }
 

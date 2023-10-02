@@ -115,14 +115,14 @@ public class CItem {
     }
 
     public ArrayList<String> getFullLore() {
-        ArrayList<String> lore = new ArrayList<>();
-        Damage damage = (Damage) getStat("damage");
-        Strength strength = (Strength) getStat("strength");
-        CritChance critChance = (CritChance) getStat("crit-chance");
-        CritDamage critDamage = (CritDamage) getStat("crit-damage");
-        Health health = (Health) getStat("health");
-        Defense defense = (Defense) getStat("defense");
-        Mana mana = (Mana) getStat("mana");
+        var lore = new ArrayList<String>();
+        var damage = (Damage) getStat("damage");
+        var strength = (Strength) getStat("strength");
+        var critChance = (CritChance) getStat("crit-chance");
+        var critDamage = (CritDamage) getStat("crit-damage");
+        var health = (Health) getStat("health");
+        var defense = (Defense) getStat("defense");
+        var mana = (Mana) getStat("mana");
 
         if (damage.getValue() != 0D) lore.add(damage.display());
         if (strength.getValue() != 0D) lore.add(strength.display());
@@ -140,7 +140,7 @@ public class CItem {
                 rarity.color(),
                 ChatColor.BOLD,
                 rarity,
-                this.type
+                this.type.substring(0, 1).toUpperCase() + this.type.substring(1).toLowerCase()
         ));
 
         lore.add(String.format(

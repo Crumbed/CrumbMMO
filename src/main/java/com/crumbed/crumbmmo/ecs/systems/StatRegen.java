@@ -5,6 +5,7 @@ import com.crumbed.crumbmmo.ecs.ComponentQuery;
 import com.crumbed.crumbmmo.ecs.EntityComponent;
 import com.crumbed.crumbmmo.ecs.EntitySystem;
 import com.crumbed.crumbmmo.ecs.components.EntityStats;
+import com.crumbed.crumbmmo.ecs.components.RawEntity;
 import com.crumbed.crumbmmo.managers.StatManager;
 import org.bukkit.Bukkit;
 
@@ -12,14 +13,19 @@ import java.util.stream.Stream;
 
 public class StatRegen extends EntitySystem {
     public StatRegen() {
-        super(20, new ComponentQuery(EntityStats.class));
+        super(20, new ComponentQuery(RawEntity.class, EntityStats.class));
     }
 
 
     @Override
     public void execute(Stream<ComponentQuery.Result> results) {
         results.forEach(r -> {
-            EntityStats stats = r
+            var entity = r.getComponent(RawEntity.class)
+                    .unwrap()
+                    .getLivingEntity(r.parentEntity);
+            if (entity.isNone() || entity.unwrap().isDead()) return;
+
+            var stats = r
                     .getComponent(EntityStats.class)
                     .unwrap();
 
