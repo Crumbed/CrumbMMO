@@ -9,15 +9,9 @@ import com.comphenix.protocol.events.PacketEvent;
 import com.crumbed.crumbmmo.commands.CustomCommand;
 import com.crumbed.crumbmmo.ecs.components.*;
 import com.crumbed.crumbmmo.ecs.systems.*;
-import com.crumbed.crumbmmo.genericEvents.ChunkLoad;
-import com.crumbed.crumbmmo.genericEvents.EntityDamage;
-import com.crumbed.crumbmmo.genericEvents.MobSpawn;
+import com.crumbed.crumbmmo.genericEvents.*;
+import com.crumbed.crumbmmo.managers.*;
 import com.crumbed.crumbmmo.serializable.MobData;
-import com.crumbed.crumbmmo.managers.EntityManager;
-import com.crumbed.crumbmmo.managers.PlayerManager;
-import com.crumbed.crumbmmo.genericEvents.PlayerJoinAndLeave;
-import com.crumbed.crumbmmo.managers.ItemManager;
-import com.crumbed.crumbmmo.managers.StatManager;
 import com.crumbed.crumbmmo.utils.Namespaces;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -51,6 +45,7 @@ public final class CrumbMMO extends JavaPlugin {
         PluginManager pm = this.getServer().getPluginManager();
         Namespaces.initNamespaces(this);
 
+        TimerManager.INSTANCE = TimerManager.init(this);
         StatManager.init();
         ItemManager.init(this);
         EntityManager.INSTANCE = new EntityManager.Builder(this)
@@ -77,6 +72,7 @@ public final class CrumbMMO extends JavaPlugin {
         pm.registerEvents(new MobSpawn(), this);
         pm.registerEvents(new ChunkLoad(), this);
         pm.registerEvents(new EntityDamage(), this);
+        pm.registerEvents(new PlayerRespawn(), this);
 
         // Gaming for auto register commands
         Reflections classes = new Reflections("com.crumbed.crumbmmo.commands");

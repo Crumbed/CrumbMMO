@@ -41,10 +41,9 @@ public class EntityStats extends EntityComponent {
 
 
 
-    public double damage(DamageValue damage) {
-        var finalDmg = damage.getDamage() - defense.getValue() / (defense.getValue() + 100) * damage.getDamage();
-        health.setValue(health.getValue() - finalDmg);
-        return finalDmg;
+    public void damage(DamageValue damage) {
+        damage.reduceDamage(defense.getValue() / (defense.getValue() + 100));
+        health.setValue(health.getValue() - damage.getDamage());
     }
 
     public void setFromGeneric(GenericStat genStat, double value) {
