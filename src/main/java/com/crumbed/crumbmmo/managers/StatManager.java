@@ -1,7 +1,9 @@
 package com.crumbed.crumbmmo.managers;
 
 import com.crumbed.crumbmmo.stats.*;
+import com.crumbed.crumbmmo.utils.None;
 import com.crumbed.crumbmmo.utils.Option;
+import com.crumbed.crumbmmo.utils.Some;
 
 public class StatManager {
     public static Option<StatManager> INSTANCE = Option.none();
@@ -35,10 +37,10 @@ public class StatManager {
             DamageType dt
     ) {
         int initDmg = (int) ((int) (5 + dmg.getValue()) * (1 + (str.getValue() / 100)));
-        float cooldown;
-        if (attackCooldown.isSome())
-            cooldown = attackCooldown.unwrap();
-        else cooldown = 1F;
+        var cooldown = switch (attackCooldown) {
+            case Some<Float> s -> s.inner();
+            case None<Float> ignored -> 1f;
+        };
 
         if (Math.random() <= critChance.getValue() && cooldown > 0.8)
             return new DamageValue((int) (initDmg * (1 + (critDamage.getValue() / 100))), true, dt);

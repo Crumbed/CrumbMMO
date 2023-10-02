@@ -24,7 +24,7 @@ public class Health implements Stat, ActionBar {
     public void setValue(double value) { this.value = value; }
 
     /**
-     * @return  The MAX health value 235/[1000]
+     * @return  The MAX health value
      */
     public double getBaseValue() { return baseHealth; }
 

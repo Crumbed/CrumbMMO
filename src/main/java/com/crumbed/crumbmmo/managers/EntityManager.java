@@ -8,17 +8,21 @@ import com.crumbed.crumbmmo.ecs.EntitySystem;
 import com.crumbed.crumbmmo.ecs.components.EntityActionBar;
 import com.crumbed.crumbmmo.ecs.components.HealthTag;
 import com.crumbed.crumbmmo.ecs.components.NameTag;
+import com.crumbed.crumbmmo.ecs.components.RawEntity;
 import com.crumbed.crumbmmo.ecs.systems.StatRegen;
 import com.crumbed.crumbmmo.serializable.MobData;
 import com.crumbed.crumbmmo.utils.Option;
 import com.crumbed.crumbmmo.utils.Some;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Entity;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.stream.Stream;
+
+import static java.util.Arrays.stream;
 
 /**
  * Manager for all thing related to entities
@@ -83,6 +87,22 @@ public class EntityManager {
         return (e == null)
                 ? Option.none()
                 : Option.some(e);
+    }
+    public Option<CEntity> getEntity(Entity e) {
+        var list = entities.stream()
+                .filter(Objects::nonNull)
+                .filter(x -> x.hasComponent(RawEntity.class))
+                .toList();
+
+        for (CEntity ent : list) {
+            var uuid = ent
+                    .getComponent(RawEntity.class)
+                    .unwrap()
+                    .id;
+
+            if (e.getUniqueId().equals(uuid)) return Option.some(ent);
+        }
+        return Option.none();
     }
 
     public Stream<CEntity> getEntities() {

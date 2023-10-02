@@ -41,6 +41,11 @@ public class EntityStats extends EntityComponent {
 
 
 
+    public void damage(DamageValue damage) {
+        damage.reduceDamage(defense.getValue() / (defense.getValue() + 100));
+        health.setValue(health.getValue() - damage.getDamage());
+    }
+
     public void setFromGeneric(GenericStat genStat, double value) {
         switch (genStat) {
             case Strength   :   strength.setValue(value); break;
