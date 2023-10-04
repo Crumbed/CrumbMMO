@@ -27,7 +27,7 @@ public class CritDamage implements Stat {
     @Override
     public String display() {
         return String.format("%sCrit Damage: %s+%d%%",
-                ChatColor.GRAY, ChatColor.RED, (int) this.value * 100
+                ChatColor.GRAY, ChatColor.RED, (int) (this.value * 100)
         );
     }
 }

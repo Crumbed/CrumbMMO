@@ -1,5 +1,6 @@
 package com.crumbed.crumbmmo.genericEvents;
 
+import com.crumbed.crumbmmo.ecs.CEntity;
 import com.crumbed.crumbmmo.ecs.CPlayer;
 import com.crumbed.crumbmmo.ecs.components.EntityStats;
 import com.crumbed.crumbmmo.managers.EntityManager;
@@ -9,6 +10,7 @@ import com.crumbed.crumbmmo.stats.DamageType;
 import com.crumbed.crumbmmo.stats.DamageValue;
 import com.crumbed.crumbmmo.utils.Option;
 import com.crumbed.crumbmmo.utils.Some;
+import com.crumbed.crumbmmo.utils.None;
 import com.crumbed.crumbmmo.utils.Timeable;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -17,20 +19,35 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityShootBowEvent;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.util.Vector;
 
 import java.util.Objects;
+
+import static com.crumbed.crumbmmo.utils.Namespaces.MOB_ID;
 
 public class EntityDamage implements Listener {
 
 
     @EventHandler
     public void onEntityDamage(EntityDamageByEntityEvent e) {
-        var optDamager = EntityManager
-                .INSTANCE
-                .getEntity(e.getDamager());
-        if (optDamager.isNone()) return;
-        var damager = optDamager.unwrap();
+        var damager = switch (e.getDamager()) {
+            case Arrow a -> {
+                var id = a
+                        .getPersistentDataContainer()
+                        .get(MOB_ID, PersistentDataType.INTEGER);
+                yield switch (EntityManager.INSTANCE.getEntity(id)) {
+                    case Some<CEntity> s -> s.inner();
+                    case None<CEntity> ignored -> null;
+                };
+            }
+            default -> switch(EntityManager.INSTANCE.getEntity(e.getDamager())) {
+                case Some<CEntity> s -> s.inner();
+                case None<CEntity> ignored -> null;
+            };
+        };
+        if (damager == null) return;
 
         var optDamagee = EntityManager
                 .INSTANCE
@@ -53,7 +70,7 @@ public class EntityDamage implements Listener {
         var damageeStats = damagee.getComponent(EntityStats.class).unwrap();
         damageeStats.damage(damage);
 
-        if (e.getDamager() instanceof Player) {
+        if (e.getDamager() instanceof Player || damager instanceof CPlayer) {
             attackIndicator(damage, (LivingEntity) e.getEntity());
         }
 
@@ -87,6 +104,15 @@ public class EntityDamage implements Listener {
         e.setDamage(damage.getDamage());
     }
 
+    @EventHandler
+    public void onBowFire(EntityShootBowEvent e) {
+        var ent = EntityManager
+                .INSTANCE
+                .getEntity(e.getEntity())
+                .unwrap();
+        var data = e.getProjectile().getPersistentDataContainer();
+        data.set(MOB_ID, PersistentDataType.INTEGER, ent.id);
+    }
 
 
     public static void attackIndicator(DamageValue damage, LivingEntity damaged) {
