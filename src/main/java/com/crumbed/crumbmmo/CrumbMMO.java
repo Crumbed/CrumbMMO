@@ -46,6 +46,7 @@ public final class CrumbMMO extends JavaPlugin {
         Namespaces.initNamespaces(this);
 
         TimerManager.INSTANCE = TimerManager.init(this);
+        CraftingManager.INSTANCE = CraftingManager.init(this);
         StatManager.init();
         ItemManager.init(this);
         EntityManager.INSTANCE = new EntityManager.Builder(this)
@@ -73,6 +74,7 @@ public final class CrumbMMO extends JavaPlugin {
         pm.registerEvents(new ChunkLoad(), this);
         pm.registerEvents(new EntityDamage(), this);
         pm.registerEvents(new PlayerRespawn(), this);
+        pm.registerEvents(new CraftingListener(), this);
 
         getProtocol().addPacketListener(new PacketAdapter(
                 this,

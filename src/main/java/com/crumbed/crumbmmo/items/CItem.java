@@ -17,6 +17,9 @@ public class CItem {
     public static final CItem EMPTY = new CItem();
     @SerializedName("display-name")
     private String name;
+
+    private ArrayList<ItemComponent> components;
+
     private HashMap<GenericStat, Double> stats;
     private ArrayList<String> lore;
     private Rarity rarity;
@@ -67,7 +70,7 @@ public class CItem {
         ArrayList<String> itemLore = (ArrayList<String>) meta.getLore();
         if (itemLore == null || !itemLore.get(itemLore.size() - 1).contains("id: ")) {
             return Option.some(new CItem(
-                    "vanilla::" + itemStack.getType(),
+                    "vanilla:" + itemStack.getType(),
                     itemStack.getType().name(),
                     Rarity.Common,
                     new HashMap<>(),

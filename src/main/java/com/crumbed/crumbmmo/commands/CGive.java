@@ -23,7 +23,9 @@ public class CGive extends CustomCommand {
                 .unwrap()
                 .itemReg
                 .get(args[0]);
+        var raw = item.getRawItem();
+        if (args[1] != null) raw.setAmount(Integer.parseInt(args[1]));
 
-        player.getInventory().addItem(item.getRawItem());
+        player.getInventory().addItem(raw);
     }
 }
