@@ -1,6 +1,7 @@
 package com.crumbed.crumbmmo.managers;
 
 import com.crumbed.crumbmmo.CrumbMMO;
+import com.crumbed.crumbmmo.commands.TabComponent;
 import com.crumbed.crumbmmo.ecs.CEntity;
 import com.crumbed.crumbmmo.ecs.ComponentQuery;
 import com.crumbed.crumbmmo.ecs.EntityComponent;
@@ -27,7 +28,7 @@ import static java.util.Arrays.stream;
 /**
  * Manager for all thing related to entities
  */
-public class EntityManager {
+public class EntityManager implements TabComponent.Source {
     public static EntityManager INSTANCE = null;
     /**
      * List of all registered entities.
@@ -164,6 +165,15 @@ public class EntityManager {
         }
 
         public EntityManager create() { return new EntityManager(systems, p); }
+    }
+
+    @Override
+    public String[] getTabSource() {
+        return entities.stream()
+                .filter(Objects::nonNull)
+                .map(x -> x.id + "")
+                .toList()
+                .toArray(String[]::new);
     }
 }
 

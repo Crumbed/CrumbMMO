@@ -1,6 +1,7 @@
 package com.crumbed.crumbmmo.managers;
 
 import com.crumbed.crumbmmo.CrumbMMO;
+import com.crumbed.crumbmmo.commands.TabComponent;
 import com.crumbed.crumbmmo.ecs.CEntity;
 import com.crumbed.crumbmmo.ecs.CPlayer;
 import com.crumbed.crumbmmo.ecs.systems.PlayerInvUpdate;
@@ -27,7 +28,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class PlayerManager {
+public class PlayerManager implements TabComponent.Source {
     public static PlayerManager INSTANCE = null;
     /**
      * Map from MC UUID -> Entity ID
@@ -236,6 +237,15 @@ public class PlayerManager {
             f.write(jsonPlayerData);
             f.close();
         } catch (IOException e) { e.printStackTrace(); }
+    }
+
+    @Override
+    public String[] getTabSource() {
+        return Bukkit.getOnlinePlayers()
+                .stream()
+                .map(Player::getName)
+                .toList()
+                .toArray(String[]::new);
     }
 }
 

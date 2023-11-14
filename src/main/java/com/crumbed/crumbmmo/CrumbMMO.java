@@ -8,6 +8,8 @@ import com.crumbed.crumbmmo.commands.CustomCommand;
 import com.crumbed.crumbmmo.ecs.components.*;
 import com.crumbed.crumbmmo.ecs.systems.*;
 import com.crumbed.crumbmmo.genericEvents.*;
+import com.crumbed.crumbmmo.items.components.ItemLore;
+import com.crumbed.crumbmmo.items.components.ItemStats;
 import com.crumbed.crumbmmo.managers.*;
 import com.crumbed.crumbmmo.serializable.MobData;
 import com.crumbed.crumbmmo.utils.Namespaces;
@@ -48,7 +50,11 @@ public final class CrumbMMO extends JavaPlugin {
         TimerManager.INSTANCE = TimerManager.init(this);
         CraftingManager.INSTANCE = CraftingManager.init(this);
         StatManager.init();
-        ItemManager.init(this);
+        ItemManager.INSTANCE = new ItemManager.Builder(this)
+                .with(ItemLore.class)
+                .with(ItemStats.class)
+                .create();
+
         EntityManager.INSTANCE = new EntityManager.Builder(this)
                 .withComponent(EntityActionBar.class)
                 .withComponent(EntityInventory.class)

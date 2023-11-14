@@ -1,9 +1,10 @@
 package com.crumbed.crumbmmo.stats;
 
+import com.crumbed.crumbmmo.commands.TabComponent;
 import com.crumbed.crumbmmo.utils.Option;
 import com.google.gson.annotations.SerializedName;
 
-public enum GenericStat {
+public enum GenericStat implements TabComponent.Source {
     @SerializedName("damage")
     Damage,
     @SerializedName("strength")
@@ -43,5 +44,20 @@ public enum GenericStat {
             case Mana       :   return "mana";
         }
         return null; // this will never run its just so the compiler will shut up
+    }
+
+    @Override
+    public String[] getTabSource() {
+        return new String[] {
+                "damage",
+                "strength",
+                "crit_damage",
+                "crit_chance",
+                "health",
+                "max_health",
+                "defense",
+                "mana",
+                "max_mana"
+        };
     }
 }

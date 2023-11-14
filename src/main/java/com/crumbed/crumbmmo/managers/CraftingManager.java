@@ -66,7 +66,7 @@ public class CraftingManager {
                         var material = matrix[y][x].getType();
                         if (!material.equals(Material.getMaterial(pattern[y][x].itemId()))) return false;
                     } else if (pattern[y][x] != null) {
-                        if (!ItemManager.INSTANCE.unwrap().itemReg.containsKey(pattern[y][x].itemId())) {
+                        if (!ItemManager.INSTANCE.itemReg.containsKey(pattern[y][x].itemId())) {
                             CrumbMMO.getInstance().getLogger().info(ChatColor.RED + "ERROR: item id: " + pattern[y][x].itemId() + " doesn't exist in recipe " + recipeSet.getKey());
                             return false;
                         }
@@ -109,7 +109,7 @@ public class CraftingManager {
                 if (rItem.itemId().toUpperCase().equals(rItem.itemId())) {
                     if (!matrix[pos].getType().equals(Material.getMaterial(rItem.itemId()))) continue;
                 } else {
-                    if (!ItemManager.INSTANCE.unwrap().itemReg.containsKey(rItem.itemId())) {
+                    if (!ItemManager.INSTANCE.itemReg.containsKey(rItem.itemId())) {
                         CrumbMMO.getInstance().getLogger().info(ChatColor.RED + "ERROR: item id: " + rItem.itemId() + " doesn't exist in recipe " + recipeSet.getKey());
                         break;
                     }

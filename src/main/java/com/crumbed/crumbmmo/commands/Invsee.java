@@ -18,6 +18,9 @@ import org.bukkit.inventory.meta.SkullMeta;
 
 @CommandInfo(name = "cpinv", permission = "cmmo.admin", requiresPlayer = false)
 public class Invsee extends CustomCommand {
+    public static TabComponent[][] ARGS = new TabComponent[][] {
+            { new TabComponent(TabComponent.Type.PlayerName, Option.some(PlayerManager.INSTANCE), false) }
+    };
 
     @Override
     public void execute(CommandSender sender, String[] args) {
@@ -75,7 +78,6 @@ public class Invsee extends CustomCommand {
         playerHead.setItemMeta(meta);
         ItemStack menuGlass = ItemManager
                 .INSTANCE
-                .unwrap()
                 .itemReg
                 .get("black_menu_glass")
                 .getRawItem();

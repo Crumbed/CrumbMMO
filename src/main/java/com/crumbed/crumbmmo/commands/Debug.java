@@ -20,6 +20,10 @@ public class Debug extends CustomCommand {
 
     @Override
     public void execute(CommandSender sender, String[] args) {
+    }
+
+
+    public static SubCommand PLAYERS = new SubCommand("players", "", false, new TabComponent[0][0], (sender, args) -> {
         sender.sendMessage("Collecting players...");
         Stream<PlayerData> players = PlayerManager
                 .INSTANCE
@@ -29,21 +33,14 @@ public class Debug extends CustomCommand {
 
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         players.forEach(p -> sender.sendMessage(gson.toJson(p)));
-    }
+    });
 
-
-    @SubCommand(name = { "players" }, requiresPlayer = false)
-    public void players(CommandSender sender, String[] args) {
-        execute(sender, args);
-    }
-
-    @SubCommand(name = { "entities" }, requiresPlayer = false)
-    public void entities(CommandSender sender, String[] args) {
-        AtomicInteger i = new AtomicInteger();
+    public static SubCommand ENTITIES = new SubCommand("entities", "", false, new TabComponent[0][0], (sender, args) -> {
+        var i = new AtomicInteger();
         EntityManager.INSTANCE
                 .getEntities()
                 .map(x -> {
-                    String rep = String.format("%s : %s", i, (x == null)
+                    var rep = String.format("%s : %s", i, (x == null)
                             ? "NULL"
                             : "Entity"
                     );
@@ -51,10 +48,12 @@ public class Debug extends CustomCommand {
                     return rep;
                 })
                 .forEach(sender::sendMessage);
-    }
+    });
 
-    @SubCommand(name = { "get_entity" }, params = { "<id>" }, requiresPlayer = false)
-    public void getEntity(CommandSender sender, String[] args) {
+
+    public static SubCommand GET_ENTITY = new SubCommand("get_entity", "", false, new TabComponent[][] {
+            { new TabComponent(TabComponent.Type.Id, Option.some(EntityManager.INSTANCE), false) }
+    }, (sender, args) -> {
         int id;
         try {
             id = Integer.parseInt(args[0]);
@@ -63,7 +62,7 @@ public class Debug extends CustomCommand {
             return;
         }
 
-        Option<CEntity> e = EntityManager
+        var e = EntityManager
                 .INSTANCE
                 .getEntity(id);
 
@@ -72,14 +71,13 @@ public class Debug extends CustomCommand {
             return;
         }
 
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        var gson = new GsonBuilder().setPrettyPrinting().create();
         sender.sendMessage(String.format(
                 "%s%s",
                 ChatColor.GRAY,
                 gson.toJson(e.unwrap())
         ));
-    }
-
+    });
 }
 
 

@@ -4,6 +4,9 @@ main: com.crumbed.crumbmmo.CrumbMMO
 depend: [ ProtocolLib ]
 api-version: '1.20'
 commands:
+  cstats:
+    description: "shortcut for cmmo stats"
+    usage: "/cstats"
   cdebug:
     description: "root debug command for cmmo"
     usage: "/cdebug"

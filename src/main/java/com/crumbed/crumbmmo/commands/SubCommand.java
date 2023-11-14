@@ -1,15 +1,22 @@
 package com.crumbed.crumbmmo.commands;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
 
-@Target(ElementType.METHOD)
-@Retention(RetentionPolicy.RUNTIME)
-public @interface SubCommand {
-    String[] name();
-    String[] params() default "";
-    String permission() default "";
-    boolean requiresPlayer();
+import com.crumbed.crumbmmo.utils.Option;
+import org.bukkit.command.CommandSender;
+
+public record SubCommand(
+        String name,
+        String permission,
+        boolean requiresPlayer,
+        TabComponent[][] params,
+        CommandFn<CommandSender, String[]> cmd
+) {
+    @FunctionalInterface
+    public interface CommandFn<SENDER, ARGS> {
+        void apply(SENDER sender, ARGS args);
+    }
+
+    public void exec(CommandSender sender, String[] args) {
+        cmd.apply(sender, args);
+    }
 }
