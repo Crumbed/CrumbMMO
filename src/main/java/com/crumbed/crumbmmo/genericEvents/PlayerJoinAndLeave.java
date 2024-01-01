@@ -1,6 +1,7 @@
 package com.crumbed.crumbmmo.genericEvents;
 
 import com.crumbed.crumbmmo.CrumbMMO;
+import com.crumbed.crumbmmo.managers.NpcManager;
 import com.crumbed.crumbmmo.managers.PlayerManager;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -14,6 +15,7 @@ public record PlayerJoinAndLeave(CrumbMMO plugin) implements Listener {
         var player = e.getPlayer();
         var pm = PlayerManager.INSTANCE;
         pm.addPlayer(player);
+        NpcManager.INSTANCE.sendNpcs(player);
         plugin.getLogger().info("Added " + player.getName() + " to PlayerManager");
     }
 

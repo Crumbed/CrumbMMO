@@ -1,24 +1,16 @@
 package com.crumbed.crumbmmo.commands;
 
-import com.crumbed.crumbmmo.CrumbMMO;
-import com.crumbed.crumbmmo.utils.Some;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.attribute.Attribute;
-import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
-import org.checkerframework.checker.units.qual.A;
 import org.reflections.Reflections;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
 import static org.reflections.scanners.Scanners.SubTypes;
@@ -65,11 +57,11 @@ public abstract class CustomCommand implements CommandExecutor, TabCompleter {
                 var cmdArg = cmdArgs.get(j)[i-iOff];
 
                 switch (cmdArg.type()) {
-                    case Int, Count -> { try {
-                        Integer.parseInt(arg);
+                    case Number, Count -> { try {
+                        Double.parseDouble(arg);
                         for (var k = cmdArgs.size()-1; k >= 0; k--) {
                             var argK = cmdArgs.get(k)[i-iOff];
-                            if (argK.type() != TabComponent.Type.Int && argK.type() != TabComponent.Type.Count) {
+                            if (argK.type() != TabComponent.Type.Number && argK.type() != TabComponent.Type.Count) {
                                 cmdArgs.remove(k);
                                 if (k < j) j--;
                             }
@@ -99,7 +91,7 @@ public abstract class CustomCommand implements CommandExecutor, TabCompleter {
                     }
 
                     case Id -> {
-                        var tabSource = cmdArg.tabSource().unwrap().getTabSource();
+                        var tabSource = cmdArg.tabSource().unwrapOr(new Literal("<ID>")).getTabSource();
                         if (Arrays.stream(tabSource)
                                 .filter(x -> x.equalsIgnoreCase(arg))
                                 .toList()
@@ -110,9 +102,14 @@ public abstract class CustomCommand implements CommandExecutor, TabCompleter {
                         }
                     }
 
-                    case Literal -> {
-                        var lit = (TabComponent.Literal) cmdArg.tabSource().unwrap();
-                        if (!arg.equalsIgnoreCase(lit.lit())) {
+                    case Lit -> {
+                        var lit = (Literal) cmdArg.tabSource().unwrapOr(new Literal("<Literal>"));
+                        var mismatchCount = 0;
+                        for (var l : lit.lit()) {
+                            if (arg.equalsIgnoreCase(l)) { break; }
+                            mismatchCount++;
+                        }
+                        if (mismatchCount == lit.lit().length) {
                             cmdArgs.remove(j);
                             j--;
                         }
@@ -143,7 +140,7 @@ public abstract class CustomCommand implements CommandExecutor, TabCompleter {
         for (var compArr : cmdArgs) {
             var comp = compArr[depth];
             tabs.addAll(switch (comp.type()) {
-                case Int -> List.of( "1", "2", "3", "4", "5", "6", "7", "8", "9", "10" );
+                case Number -> List.of((comp.tabSource().unwrapOr(new Literal("<Number>"))).getTabSource());
                 case Count -> {
                     if (comp.tabSource().isSome())
                         yield Arrays.stream(comp.tabSource().unwrap().getTabSource()).toList();
@@ -151,8 +148,10 @@ public abstract class CustomCommand implements CommandExecutor, TabCompleter {
                     for (var i = 1; i <= 64; i++) l[i-1] = i;
                     yield Arrays.stream(l).mapToObj(x -> x + "").toList();
                 }
-                case Id, PlayerName -> Arrays.stream(comp.tabSource().unwrap().getTabSource()).toList();
-                case Literal -> List.of(((TabComponent.Literal) comp.tabSource().unwrap()).lit());
+                case Id, PlayerName -> Arrays.stream(
+                        comp.tabSource().unwrapOr(new Literal("")).getTabSource()
+                ).toList();
+                case Lit -> List.of((comp.tabSource().unwrapOr(new Literal(""))).getTabSource());
             });
         }
 

@@ -50,7 +50,7 @@ public class CStatsCmd extends CustomCommand {
     public static SubCommand SET = new SubCommand("set", "cmmo.admin", false, new TabComponent[][] {
             {
                     new TabComponent(TabComponent.Type.Id, Option.some(GenericStat.Damage), false),
-                    new TabComponent(TabComponent.Type.Int, Option.none(), false),
+                    new TabComponent(TabComponent.Type.Number, Option.none(), false),
                     new TabComponent(TabComponent.Type.PlayerName, Option.some(PlayerManager.INSTANCE), false)
             }
     }, (sender, args) -> {

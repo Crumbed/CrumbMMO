@@ -1,9 +1,12 @@
 name: CrumbMMO
 version: '${project.version}'
 main: com.crumbed.crumbmmo.CrumbMMO
-depend: [ ProtocolLib ]
+depend: [ ProtocolLib, LuckPerms ]
 api-version: '1.20'
 commands:
+  npc:
+    description: "npc cmd"
+    usage: "/npc"
   cstats:
     description: "shortcut for cmmo stats"
     usage: "/cstats"

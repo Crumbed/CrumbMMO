@@ -63,6 +63,7 @@ public final class CrumbMMO extends JavaPlugin {
                 .withComponent(EntityName.class)
                 .withComponent(NameTag.class)
                 .withComponent(HealthTag.class)
+                .withComponent(NpcComponent.class)
                 .withSystem(new ActionBarSystem())
                 .withSystem(new PlayerInvUpdate())
                 .withSystem(new StatRegen())
@@ -71,6 +72,7 @@ public final class CrumbMMO extends JavaPlugin {
                 .withSystem(new SyncHealthTag())
                 .create();
         PlayerManager.init(this);
+        NpcManager.INSTANCE = new NpcManager();
         MobData.loadMobData(this);
 
 
@@ -81,6 +83,7 @@ public final class CrumbMMO extends JavaPlugin {
         pm.registerEvents(new EntityDamage(), this);
         pm.registerEvents(new PlayerRespawn(), this);
         pm.registerEvents(new CraftingListener(), this);
+        pm.registerEvents(new NpcEvents(), this);
 
         getProtocol().addPacketListener(new PacketAdapter(
                 this,
@@ -94,6 +97,7 @@ public final class CrumbMMO extends JavaPlugin {
                 if (packetId == 24 || packetId == 0) event.setCancelled(true);
             }
         });
+
 
         // Gaming for auto register commands
         Reflections classes = new Reflections("com.crumbed.crumbmmo.commands");

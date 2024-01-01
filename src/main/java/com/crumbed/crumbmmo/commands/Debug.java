@@ -1,22 +1,31 @@
 package com.crumbed.crumbmmo.commands;
 
+import com.crumbed.crumbmmo.displays.CDisplay;
+import com.crumbed.crumbmmo.displays.DisplayRow;
 import com.crumbed.crumbmmo.ecs.CEntity;
 import com.crumbed.crumbmmo.managers.EntityManager;
+import com.crumbed.crumbmmo.managers.NpcManager;
 import com.crumbed.crumbmmo.managers.PlayerManager;
 import com.crumbed.crumbmmo.ecs.CPlayer;
 import com.crumbed.crumbmmo.serializable.PlayerData;
 import com.crumbed.crumbmmo.utils.Option;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 @CommandInfo(name = "cdebug", permission = "cmmo.debug", requiresPlayer = false, treeCommand = true)
 public class Debug extends CustomCommand {
+    public static TabComponent[][] ARGS = {
+            { new TabComponent(TabComponent.Type.Lit, Option.some(new Literal("")), false) }
+    };
 
     @Override
     public void execute(CommandSender sender, String[] args) {
@@ -77,6 +86,32 @@ public class Debug extends CustomCommand {
                 ChatColor.GRAY,
                 gson.toJson(e.unwrap())
         ));
+    });
+
+
+    public static SubCommand NPC_TEST = new SubCommand("npctest", "", true, new TabComponent[][] {
+    }, (sender, args) -> {
+        Bukkit.getLogger().info("testing npc");
+        NpcManager.INSTANCE.createNpc("test", ((Player) sender).getLocation());
+    });
+
+    public static SubCommand DISPLAY_TEST = new SubCommand("newdisplay", "", true, new TabComponent[][] {
+    }, (sender, args) -> {
+        var p = (Player) sender;
+        var display = new CDisplay(p.getWorld(), 16, 9);
+        display.setLocation(p.getEyeLocation().getX(), p.getEyeLocation().getY(), p.getEyeLocation().getZ());
+    });
+
+    public static SubCommand KILL_DISPLAY = new SubCommand("killdisplay", "", true, new TabComponent[][] {
+            { new TabComponent(TabComponent.Type.Id, Option.some(new CDisplay()), true) }
+    }, (sender, args) -> {
+        var p = (Player) sender;
+        var display = CDisplay.displays.get(UUID.fromString(args[0]));
+        for (var row : display.rows) {
+            row.raw.remove();
+        }
+
+        CDisplay.displays.remove(UUID.fromString(args[0]));
     });
 }
 

@@ -3,6 +3,7 @@ package com.crumbed.crumbmmo.genericEvents;
 import com.crumbed.crumbmmo.ecs.CEntity;
 import com.crumbed.crumbmmo.managers.EntityManager;
 import com.crumbed.crumbmmo.utils.Option;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -35,6 +36,7 @@ public class MobSpawn implements Listener {
     }
     public static void despawnMob(LivingEntity e) {
         if (e instanceof ArmorStand || e instanceof Player) return;
+        Bukkit.getLogger().info(e.getName());
         var data = e.getPersistentDataContainer();
         int id = switch (data.get(MOB_ID, PersistentDataType.INTEGER)) {
             case null -> -1;

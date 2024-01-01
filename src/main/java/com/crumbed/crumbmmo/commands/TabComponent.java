@@ -8,20 +8,15 @@ public record TabComponent(Type type, Option<? extends Source> tabSource, boolea
         PlayerName,
         Id,
         Count,
-        Int,
-        Literal
+        Number,
+        Lit
     }
 
     public interface Source {
         String[] getTabSource();
     }
 
-    public record Literal(String lit) implements Source {
-        @Override
-        public String[] getTabSource() {
-            return new String[] { lit };
-        }
-    }
+
 }
 
 
