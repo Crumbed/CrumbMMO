@@ -85,8 +85,14 @@ public class EntityDamage implements Listener {
 
     @EventHandler
     public void onEntityFall(EntityDamageEvent e) {
-        if (e.getCause() != EntityDamageEvent.DamageCause.FALL) return;
-        var damage = new DamageValue((int) e.getDamage() * 5, false, DamageType.Fall);
+        if (e.getCause() == EntityDamageEvent.DamageCause.ENTITY_ATTACK
+                || e.getCause() == EntityDamageEvent.DamageCause.ENTITY_SWEEP_ATTACK
+                || e.getCause() == EntityDamageEvent.DamageCause.SONIC_BOOM
+                || e.getCause() == EntityDamageEvent.DamageCause.PROJECTILE
+                || e.getCause() == EntityDamageEvent.DamageCause.DRAGON_BREATH
+                || e.getCause() == EntityDamageEvent.DamageCause.WITHER
+        ) return;
+        var damage = new DamageValue((int) e.getDamage() * 5, false, DamageType.Natural);
         if (!(e.getEntity() instanceof LivingEntity entity) || e.getEntity() instanceof ArmorStand) return;
         var optEnt = EntityManager.INSTANCE.getEntity(entity);
         if (optEnt.isNone()) return;

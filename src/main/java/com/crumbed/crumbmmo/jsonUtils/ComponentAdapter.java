@@ -1,13 +1,11 @@
-package com.crumbed.crumbmmo.serializable;
+package com.crumbed.crumbmmo.jsonUtils;
 
-import com.crumbed.crumbmmo.commands.CustomCommand;
 import com.crumbed.crumbmmo.items.ItemComponent;
 import com.google.gson.*;
 import com.google.gson.annotations.SerializedName;
 import org.bukkit.Bukkit;
 import org.reflections.Reflections;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
 
 import static org.reflections.scanners.Scanners.SubTypes;

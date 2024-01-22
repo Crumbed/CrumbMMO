@@ -1,4 +1,4 @@
-package com.crumbed.crumbmmo.serializable;
+package com.crumbed.crumbmmo.jsonUtils;
 
 import com.crumbed.crumbmmo.CrumbMMO;
 import com.crumbed.crumbmmo.ecs.CEntity;
@@ -11,18 +11,15 @@ import com.crumbed.crumbmmo.utils.Some;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.SerializedName;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.*;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.util.Transformation;
 import org.joml.Matrix4f;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.stream.Collectors;

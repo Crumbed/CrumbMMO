@@ -1,19 +1,21 @@
 package com.crumbed.crumbmmo.commands;
 
 import com.crumbed.crumbmmo.displays.CDisplay;
-import com.crumbed.crumbmmo.displays.DisplayRow;
-import com.crumbed.crumbmmo.ecs.CEntity;
 import com.crumbed.crumbmmo.managers.EntityManager;
 import com.crumbed.crumbmmo.managers.NpcManager;
 import com.crumbed.crumbmmo.managers.PlayerManager;
 import com.crumbed.crumbmmo.ecs.CPlayer;
-import com.crumbed.crumbmmo.serializable.PlayerData;
+import com.crumbed.crumbmmo.jsonUtils.PlayerData;
 import com.crumbed.crumbmmo.utils.Option;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.mojang.brigadier.CommandDispatcher;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.craftbukkit.v1_20_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
 import java.util.Objects;
@@ -26,6 +28,7 @@ public class Debug extends CustomCommand {
     public static TabComponent[][] ARGS = {
             { new TabComponent(TabComponent.Type.Lit, Option.some(new Literal("")), false) }
     };
+
 
     @Override
     public void execute(CommandSender sender, String[] args) {
@@ -93,6 +96,15 @@ public class Debug extends CustomCommand {
     }, (sender, args) -> {
         Bukkit.getLogger().info("testing npc");
         NpcManager.INSTANCE.createNpc("test", ((Player) sender).getLocation());
+    });
+
+    public static SubCommand NPC_2ND_LAYER = new SubCommand("npc2ndlayer", "", true, new TabComponent[][] {
+    }, (sender, args) -> {
+        var p = (Player) sender;
+        NpcManager.INSTANCE.getNpcs().forEach(npc -> {
+            var con = ((CraftPlayer) p).getHandle().connection;
+            con.send(new ClientboundSetEntityDataPacket(npc.raw.getId(), npc.raw.getEntityData().packDirty()));
+        });
     });
 
     public static SubCommand DISPLAY_TEST = new SubCommand("newdisplay", "", true, new TabComponent[][] {

@@ -3,25 +3,3 @@ version: '${project.version}'
 main: com.crumbed.crumbmmo.CrumbMMO
 depend: [ ProtocolLib, LuckPerms ]
 api-version: '1.20'
-commands:
-  npc:
-    description: "npc cmd"
-    usage: "/npc"
-  cstats:
-    description: "shortcut for cmmo stats"
-    usage: "/cstats"
-  cdebug:
-    description: "root debug command for cmmo"
-    usage: "/cdebug"
-  cmmo:
-    description: "parent command for cmmo"
-    usage: "/cmmo"
-  cgive:
-    description: "gives a custom item"
-    usage: "/cgive"
-  cpinv:
-    description: "views a players inventory"
-    usage: "/cpinv <player-ign>"
-  creload:
-    description: "reloads server plugins"
-    usage: "/creload"

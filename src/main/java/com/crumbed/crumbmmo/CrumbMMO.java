@@ -4,6 +4,8 @@ import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.*;
+import com.crumbed.crumbmmo.commands.BrigadierCommand;
+import com.crumbed.crumbmmo.commands.BrigadierTest;
 import com.crumbed.crumbmmo.commands.CustomCommand;
 import com.crumbed.crumbmmo.ecs.components.*;
 import com.crumbed.crumbmmo.ecs.systems.*;
@@ -11,25 +13,17 @@ import com.crumbed.crumbmmo.genericEvents.*;
 import com.crumbed.crumbmmo.items.components.ItemLore;
 import com.crumbed.crumbmmo.items.components.ItemStats;
 import com.crumbed.crumbmmo.managers.*;
-import com.crumbed.crumbmmo.serializable.MobData;
+import com.crumbed.crumbmmo.jsonUtils.MobData;
 import com.crumbed.crumbmmo.utils.Namespaces;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Particle;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.plugin.Plugin;
+import org.bukkit.craftbukkit.v1_20_R1.CraftServer;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.util.Vector;
-import org.checkerframework.checker.units.qual.C;
 import org.reflections.Reflections;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Objects;
 import java.util.UUID;
 
-import static com.crumbed.crumbmmo.utils.Namespaces.MOB_ID;
 import static org.reflections.scanners.Scanners.SubTypes;
 
 
@@ -72,7 +66,7 @@ public final class CrumbMMO extends JavaPlugin {
                 .withSystem(new SyncHealthTag())
                 .create();
         PlayerManager.init(this);
-        NpcManager.INSTANCE = new NpcManager();
+        NpcManager.INSTANCE = NpcManager.loadNpcs(this);
         MobData.loadMobData(this);
 
 
@@ -98,14 +92,15 @@ public final class CrumbMMO extends JavaPlugin {
             }
         });
 
+        var server = ((CraftServer) getServer()).getServer();
+        var dispatcher = server.resources.managers().commands.getDispatcher();
 
         // Gaming for auto register commands
         Reflections classes = new Reflections("com.crumbed.crumbmmo.commands");
-        for (Class<?> clazz : classes.get(SubTypes.of(CustomCommand.class).asClass())) {
+        for (Class<?> clazz : classes.get(SubTypes.of(BrigadierCommand.class).asClass())) {
             try {
-                CustomCommand customCommand = (CustomCommand) clazz.getDeclaredConstructor().newInstance();
-                getCommand(customCommand.getCommandInfo().name()).setExecutor(customCommand);
-                getCommand(customCommand.getCommandInfo().name()).setTabCompleter(customCommand);
+                var cmd = (BrigadierCommand) clazz.getDeclaredConstructor().newInstance();
+                dispatcher.register(cmd.build());
             } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
                 e.printStackTrace();
             }
@@ -120,6 +115,7 @@ public final class CrumbMMO extends JavaPlugin {
     @Override
     public void onDisable() {
         PlayerManager.INSTANCE.writeData(this);
+        NpcManager.INSTANCE.saveNpcs(this);
         EntityManager.INSTANCE
                 .getEntities()
                 .filter(Objects::nonNull)

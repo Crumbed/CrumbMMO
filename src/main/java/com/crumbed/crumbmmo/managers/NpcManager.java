@@ -1,27 +1,21 @@
 package com.crumbed.crumbmmo.managers;
 
 import com.comphenix.protocol.PacketType;
-import com.comphenix.protocol.events.PacketContainer;
-import com.comphenix.protocol.wrappers.EnumWrappers;
-import com.comphenix.protocol.wrappers.PlayerInfoData;
-import com.comphenix.protocol.wrappers.WrappedChatComponent;
-import com.comphenix.protocol.wrappers.WrappedGameProfile;
 import com.crumbed.crumbmmo.CrumbMMO;
 import com.crumbed.crumbmmo.commands.TabComponent;
 import com.crumbed.crumbmmo.ecs.CEntity;
 import com.crumbed.crumbmmo.ecs.NPC;
+import com.crumbed.crumbmmo.jsonUtils.NpcAdapter;
+import com.crumbed.crumbmmo.jsonUtils.NpcData;
+import com.crumbed.crumbmmo.utils.None;
 import com.crumbed.crumbmmo.utils.Option;
 import com.crumbed.crumbmmo.utils.Some;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.google.gson.annotations.SerializedName;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
-import com.mojang.authlib.properties.PropertyMap;
-import com.mojang.util.UUIDTypeAdapter;
-import io.netty.buffer.ByteBuf;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.game.*;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -33,29 +27,70 @@ import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_20_R1.CraftServer;
 import org.bukkit.craftbukkit.v1_20_R1.CraftWorld;
 import org.bukkit.craftbukkit.v1_20_R1.entity.CraftPlayer;
-import org.bukkit.craftbukkit.v1_20_R1.metadata.EntityMetadataStore;
 import org.bukkit.entity.Player;
 
-import javax.net.ssl.HttpsURLConnection;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.lang.reflect.Field;
-import java.net.MalformedURLException;
+import java.io.*;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.nio.file.Files;
+import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class NpcManager implements TabComponent.Source {
     public static NpcManager INSTANCE = null;
 
-    public HashMap<String, Integer> npcs;
+    @SerializedName("json-npcs")
+    private ArrayList<NpcData> jsonNpcs;
+    transient public HashMap<String, Integer> npcs;
 
     public NpcManager() {
+        jsonNpcs = new ArrayList<>();
         npcs = new HashMap<>();
+    }
+
+
+    public static NpcManager loadNpcs(CrumbMMO plugin) {
+        var f = new File(plugin.getDataFolder(), "Npcs.json");
+
+        if (!f.exists()) try {
+            f.createNewFile();
+            return new NpcManager();
+        } catch (IOException ignored){}
+        else try (Stream<String> lines = Files.lines(f.toPath())) {
+            var jsonNpcs = String.join("\n", lines
+                    .collect(Collectors.toList()));
+            var gson = new GsonBuilder()
+                    .registerTypeAdapter(NpcData.class, new NpcAdapter())
+                    .create();
+            var manager = gson.fromJson(jsonNpcs, NpcManager.class);
+            manager.jsonNpcs.stream().map(NPC::new).forEach(x -> {
+                EntityManager.INSTANCE.addEntity(x);
+                manager.npcs.put(x.raw.displayName, x.id);
+            });
+
+            return manager;
+        } catch (IOException ignored){}
+        return null;
+    }
+
+    public void saveNpcs(CrumbMMO plugin) {
+        try {
+            var f = new FileWriter(new File(plugin.getDataFolder(), "Npcs.json"));
+            var gson = new GsonBuilder()
+                    .registerTypeAdapter(NpcData.class, new NpcAdapter())
+                    .setPrettyPrinting()
+                    .create();
+            jsonNpcs = this.npcs.entrySet()
+                    .stream()
+                    .map(x -> ((NPC) EntityManager.INSTANCE.getEntity(x.getValue()).unwrap()).toNpcData(x.getKey()))
+                    .collect(Collectors.toCollection(ArrayList::new));
+
+            f.write(gson.toJson(this));
+            f.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
 
@@ -73,34 +108,53 @@ public class NpcManager implements TabComponent.Source {
     }
 
     public void addPacket(ServerPlayer npc) {
-        var dw = npc.getEntityData();
-        var data = new EntityDataAccessor<>(17, EntityDataSerializers.BYTE);
-        dw.set(data, (byte) 127);
-
+        var dataItem = new SynchedEntityData.DataItem<>(new EntityDataAccessor<>(17, EntityDataSerializers.BYTE), (byte) 127);
         PlayerManager.INSTANCE.getPlayers().forEach(p -> {
             var con = ((CraftPlayer) p.rawPlayer).getHandle().connection;
             con.send(new ClientboundPlayerInfoUpdatePacket(ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER, npc));
             con.send(new ClientboundAddPlayerPacket(npc));
             con.send(new ClientboundRotateHeadPacket(npc, (byte) (npc.getBukkitYaw() * 256 / 360)));
-            con.send(new ClientboundSetEntityDataPacket(npc.getId(), dw.packDirty()));
+            con.send(new ClientboundSetEntityDataPacket(npc.getId(), List.of(dataItem.value())));
         });
     }
 
     public void sendNpcs(Player p) {
+        var dataItem = new SynchedEntityData.DataItem<>(new EntityDataAccessor<>(17, EntityDataSerializers.BYTE), (byte) 127);
         for (var id : npcs.values()) {
             var npc = ((NPC) EntityManager.INSTANCE
                     .getEntity(id)
                     .unwrap())
                     .raw;
-            var dw = npc.getEntityData();
-            var data = new EntityDataAccessor<>(17, EntityDataSerializers.BYTE);
-            dw.set(data, (byte) 127);
 
             var con = ((CraftPlayer) p).getHandle().connection;
             con.send(new ClientboundPlayerInfoUpdatePacket(ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER, npc));
             con.send(new ClientboundAddPlayerPacket(npc));
             con.send(new ClientboundRotateHeadPacket(npc, (byte) (npc.getBukkitYaw() * 256 / 360)));
-            con.send(new ClientboundSetEntityDataPacket(npc.getId(), dw.packDirty()));
+            con.send(new ClientboundSetEntityDataPacket(npc.getId(), List.of(dataItem.value())));
+        }
+    }
+
+
+    private Option<String[]> getSkin(String name) {
+        try {
+            var gson = new GsonBuilder().setPrettyPrinting().create();
+            var url = new URL("https://api.mojang.com/users/profiles/minecraft/" + name);
+            var reader = new InputStreamReader(url.openStream());
+            var uuid = gson.fromJson(reader, JsonObject.class).get("id").getAsString();
+
+            var url2 = new URL("https://sessionserver.mojang.com/session/minecraft/profile/" + uuid + "?unsigned=false");
+            var reader2 = new InputStreamReader(url2.openStream());
+            var props = gson.fromJson(reader2, JsonObject.class)
+                    .get("properties")
+                    .getAsJsonArray()
+                    .get(0)
+                    .getAsJsonObject();
+            var texture = props.get("value").getAsString();
+            var signature = props.get("signature").getAsString();
+
+            return Option.some(new String[] { texture, signature });
+        } catch (IOException ignored) {
+            return Option.none();
         }
     }
 
@@ -148,7 +202,7 @@ public class NpcManager implements TabComponent.Source {
         if (!(get(npcId) instanceof Some<NPC> s)) return false;
         var npc = s.inner();
 
-        var profileClass = GameProfile.class;
+        final var profileClass = GameProfile.class;
         try {
             var field = profileClass.getDeclaredField("name");
             field.setAccessible(true);
@@ -158,47 +212,27 @@ public class NpcManager implements TabComponent.Source {
             return false;
         }
 
-        var p_info = new ClientboundPlayerInfoUpdatePacket(ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER, npc.raw);
-        var p_add = new ClientboundAddPlayerPacket(npc.raw);
-        var p_rotate = new ClientboundRotateHeadPacket(npc.raw, (byte) (npc.raw.getBukkitYaw() * 256 / 360));
-        PlayerManager.INSTANCE.getPlayers().forEach(p -> {
-            var con = ((CraftPlayer) p.rawPlayer).getHandle().connection;
-            con.send(p_info);
-            con.send(p_add);
-            con.send(p_rotate);
-        });
+        npc.raw.displayName = newName;
+
         return true;
     }
 
-    public boolean setSkin(String npcId, String uuid) {
+    public boolean setSkin(String npcId, String name) {
         if (!(get(npcId) instanceof Some<NPC> s)) return false;
         var npc = s.inner();
+        var skin = switch (getSkin(name)) {
+            case Some<String[]> someSkin -> someSkin.inner();
+            case None<String[]> ignored -> null;
+        };
+        if (skin == null) return false;
 
-        try {
-            var connection = (HttpsURLConnection) new URL(String.format("https://sessionserver.mojang.com/session/minecraft/profile/%s?unsigned=false", uuid)).openConnection();
-            if (connection.getResponseCode() == HttpsURLConnection.HTTP_OK) {
-                var reply = String.join("\n", new BufferedReader(new InputStreamReader(connection.getInputStream())).lines().toList().toArray(String[]::new));
-                Bukkit.getLogger().info(reply);
-                var jsonParser = new JsonParser();
-                var gson = new Gson();
-                var profile = (JsonObject) jsonParser.parse(reply);
-
-                var texturesJson = profile.get("properties").getAsJsonArray().get(0);
-                var textures = gson.fromJson(texturesJson, Property.class);
-
-                npc.flags.skinTexture = textures.getValue();
-                npc.flags.skinSignature = textures.getSignature();
-                npc.profile.getProperties().put("textures", textures);
-                return true;
-            } else {
-                System.out.println("Connection could not be opened (Response code " + connection.getResponseCode() + ", " + connection.getResponseMessage() + ")");
-                return false;
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        }
+        npc.flags.skinTexture = skin[0];
+        npc.flags.skinSignature = skin[1];
+        npc.raw.getGameProfile().getProperties().get("textures").clear();
+        npc.raw.getGameProfile().getProperties().put("textures", new Property("textures", skin[0], skin[1]));
+        return true;
     }
+
 
     public boolean setFlag(String npcId, String flag, boolean value) {
         if (!(get(npcId) instanceof Some<NPC> s)) return false;

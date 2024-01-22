@@ -1,15 +1,20 @@
 package com.crumbed.crumbmmo.managers;
 
 import com.crumbed.crumbmmo.CrumbMMO;
+import com.crumbed.crumbmmo.commands.BrigadierCommand;
 import com.crumbed.crumbmmo.commands.TabComponent;
 import com.crumbed.crumbmmo.ecs.CPlayer;
 import com.crumbed.crumbmmo.items.CItem;
 import com.crumbed.crumbmmo.items.ItemComponent;
 import com.crumbed.crumbmmo.items.Rarity;
-import com.crumbed.crumbmmo.serializable.ComponentAdapter;
+import com.crumbed.crumbmmo.jsonUtils.ComponentAdapter;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.suggestion.Suggestions;
+import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import net.minecraft.commands.CommandSourceStack;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -25,7 +30,9 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 /**
@@ -74,8 +81,8 @@ public class ItemManager implements TabComponent.Source {
                 inv.setItem(i, new ItemStack(Material.AIR));
                 if (!(inv instanceof PlayerInventory)) continue;
                 ((PlayerInventory) inv)
-                        .getHolder()
-                        .sendMessage(ChatColor.RED + "An unrecognised item was removed from your inventory, please contact staff if you believe this was a mistake.");
+                    .getHolder()
+                    .sendMessage(ChatColor.RED + "An unrecognised item was removed from your inventory, please contact staff if you believe this was a mistake.");
                 Bukkit.getLogger().info(item.getItemMeta().getDisplayName() + ", was removed from " + ((PlayerInventory) inv).getHolder().getName() + "'s inventory.");
                 continue;
             }
@@ -83,21 +90,21 @@ public class ItemManager implements TabComponent.Source {
             CItem currItem = CItem.fromItemStack(item).unwrap();
 
             if (!currItem.getName().equals(freshItem.getName()) ||
-                    !currItem.getMaterial().equals(freshItem.getMaterial()) ||
-                    !currItem.getStats().equals(freshItem.getStats()) ||
-                    !currItem.getRarity().equals(freshItem.getRarity())
+                !currItem.getMaterial().equals(freshItem.getMaterial()) ||
+                !currItem.getStats().equals(freshItem.getStats()) ||
+                !currItem.getRarity().equals(freshItem.getRarity())
             ) {
                 inv.setItem(i, freshItem.getRawItem());
                 if (inv instanceof PlayerInventory) {
                     CPlayer player = PlayerManager
-                            .INSTANCE
-                            .getPlayer(((PlayerInventory) inv)
-                                    .getHolder()
-                                    .getUniqueId())
-                            .unwrap();
+                        .INSTANCE
+                        .getPlayer(((PlayerInventory) inv)
+                            .getHolder()
+                            .getUniqueId())
+                        .unwrap();
                     PlayerManager
-                            .INSTANCE
-                            .syncPlayerInv(player);
+                        .INSTANCE
+                        .syncPlayerInv(player);
                 }
             }
         }
@@ -149,15 +156,15 @@ public class ItemManager implements TabComponent.Source {
             } catch (IOException ignored){}
             else try (var lines = Files.lines(f.toPath())) {
                 var customItems = String.join("\n", lines
-                        .collect(Collectors.toList()));
+                    .collect(Collectors.toList()));
                 var gson = new Gson();
                 ins = gson.fromJson(customItems, ItemManager.class);
             } catch (IOException ignored){}
             assert ins != null;
             ins.itemReg = new HashMap<>();
             var gson = new Gson().newBuilder()
-                    .registerTypeAdapter(ItemComponent.class, new ComponentAdapter<ItemComponent>())
-                    .create();
+                .registerTypeAdapter(ItemComponent.class, new ComponentAdapter<ItemComponent>())
+                .create();
 
             for (String id : ins.itemIds) {
                 Bukkit.getLogger().info("Attempting to load item: " + id);
@@ -174,16 +181,21 @@ public class ItemManager implements TabComponent.Source {
             menuGlassMeta.setDisplayName(" ");
             menuGlassItem.setItemMeta(menuGlassMeta);
             var menuGlass = new CItem("menu_glass",
-                    " ",
-                    Rarity.Contraband,
-                    "null",
-                    "null",
-                    menuGlassItem
+                " ",
+                Rarity.Contraband,
+                "null",
+                "null",
+                menuGlassItem
             );
 
             ins.itemReg.put("black_menu_glass", menuGlass);
             return ins;
         }
+    }
+
+
+    public Stream<String> getItemIds() {
+        return itemIds.stream();
     }
 
     @Override

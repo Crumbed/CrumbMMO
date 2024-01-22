@@ -1,4 +1,4 @@
-package com.crumbed.crumbmmo.serializable;
+package com.crumbed.crumbmmo.jsonUtils;
 
 import com.crumbed.crumbmmo.ecs.components.EntityInventory;
 import com.crumbed.crumbmmo.ecs.components.EntityStats;

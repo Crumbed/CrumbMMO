@@ -3,7 +3,7 @@ package com.crumbed.crumbmmo.ecs;
 import com.crumbed.crumbmmo.ecs.components.*;
 import com.crumbed.crumbmmo.ecs.systems.PlayerInvUpdate;
 import com.crumbed.crumbmmo.stats.*;
-import com.crumbed.crumbmmo.serializable.PlayerData;
+import com.crumbed.crumbmmo.jsonUtils.PlayerData;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.attribute.Attribute;

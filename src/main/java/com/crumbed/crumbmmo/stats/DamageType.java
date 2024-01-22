@@ -4,5 +4,5 @@ public enum DamageType {
     Melee,
     Ranged,
     Magic,
-    Fall;
+    Natural;
 }

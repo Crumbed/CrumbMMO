@@ -1,7 +1,6 @@
-package com.crumbed.crumbmmo.serializable;
+package com.crumbed.crumbmmo.jsonUtils;
 
 import com.crumbed.crumbmmo.ecs.CPlayer;
-import com.crumbed.crumbmmo.serializable.PlayerData;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
