@@ -6,7 +6,11 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
+import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
+
+import static com.mojang.brigadier.arguments.StringArgumentType.string;
 
 public abstract class BrigadierCommand {
 
@@ -20,7 +24,11 @@ public abstract class BrigadierCommand {
         return RequiredArgumentBuilder.argument(name, type);
     }
 
-    public <T> T getArg(CommandContext<CommandSourceStack> c, String name, Class<T> clazz, T defaultReturn) {
+    public RequiredArgumentBuilder<CommandSourceStack, String> arg(Params param) {
+        return RequiredArgumentBuilder.argument(param.name(), string());
+    }
+
+    public static <T> T getArg(CommandContext<CommandSourceStack> c, String name, Class<T> clazz, T defaultReturn) {
         try {
             return c.getArgument(name, clazz);
         } catch (IllegalArgumentException ignored) {
@@ -29,6 +37,25 @@ public abstract class BrigadierCommand {
     }
 
 
+
+    public enum Params {
+        Player ("player-name"),
+        Npc ("npc-id"),
+        Stat ("stat");
+
+
+
+        private final String raw;
+
+        Params(String s) { raw = s; }
+
+        public RequiredArgumentBuilder<CommandSourceStack, String> arg() {
+            return RequiredArgumentBuilder.argument(raw, string());
+        }
+
+        @Override
+        public String toString() { return raw; }
+    }
 }
 
 

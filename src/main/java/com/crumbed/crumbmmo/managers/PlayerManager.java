@@ -1,7 +1,6 @@
 package com.crumbed.crumbmmo.managers;
 
 import com.crumbed.crumbmmo.CrumbMMO;
-import com.crumbed.crumbmmo.commands.TabComponent;
 import com.crumbed.crumbmmo.ecs.CEntity;
 import com.crumbed.crumbmmo.ecs.CPlayer;
 import com.crumbed.crumbmmo.ecs.systems.PlayerInvUpdate;
@@ -12,6 +11,10 @@ import com.crumbed.crumbmmo.utils.Option;
 import com.crumbed.crumbmmo.utils.Some;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.suggestion.Suggestions;
+import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import net.minecraft.commands.CommandSourceStack;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -22,10 +25,13 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class PlayerManager implements TabComponent.Source {
+import static com.crumbed.crumbmmo.commands.BrigadierCommand.getArg;
+
+public class PlayerManager {
     public static PlayerManager INSTANCE = null;
     /**
      * Map from MC UUID -> Entity ID
@@ -74,9 +80,10 @@ public class PlayerManager implements TabComponent.Source {
                 .addEntity(p);
 
         // Calculate player health scale
-        double healthScale = p.getStats()
-                .health
-                .calcHealthScale();
+        double healthScale = StatManager
+            .INSTANCE
+            .unwrap()
+            .calcHealthScale(p.getStats().health);
         PlayerManager.INSTANCE
                 .getHealthScales()
                 .put(p.id, healthScale);
@@ -183,25 +190,25 @@ public class PlayerManager implements TabComponent.Source {
             //Bukkit.getLogger().info("held slot: " + heldItemSlot);
 
             if (p.inv.inventory[p.inv.activeSlot] != null && i == heldItemSlot) {
-                swapStats[PlayerInvUpdate.DAMAGE] -= p.inv.inventory[p.inv.activeSlot].getStat("damage").getValue();
-                swapStats[PlayerInvUpdate.STRENGTH] -= p.inv.inventory[p.inv.activeSlot].getStat("strength").getValue();
-                swapStats[PlayerInvUpdate.CRITDAMAGE] -= p.inv.inventory[p.inv.activeSlot].getStat("crit-damage").getValue();
-                swapStats[PlayerInvUpdate.CRITCHANCE] -= p.inv.inventory[p.inv.activeSlot].getStat("crit-chance").getValue();
-                swapStats[PlayerInvUpdate.HEALTH] -= p.inv.inventory[p.inv.activeSlot].getStat("health").getValue();
-                swapStats[PlayerInvUpdate.DEFENSE] -= p.inv.inventory[p.inv.activeSlot].getStat("defense").getValue();
-                swapStats[PlayerInvUpdate.MANA] -= p.inv.inventory[p.inv.activeSlot].getStat("mana").getValue();
+                swapStats[PlayerInvUpdate.DAMAGE] -= p.inv.inventory[p.inv.activeSlot].getStat("damage").value;
+                swapStats[PlayerInvUpdate.STRENGTH] -= p.inv.inventory[p.inv.activeSlot].getStat("strength").value;
+                swapStats[PlayerInvUpdate.CRITDAMAGE] -= p.inv.inventory[p.inv.activeSlot].getStat("crit-damage").value;
+                swapStats[PlayerInvUpdate.CRITCHANCE] -= p.inv.inventory[p.inv.activeSlot].getStat("crit-chance").value;
+                swapStats[PlayerInvUpdate.HEALTH] -= p.inv.inventory[p.inv.activeSlot].getStat("health").value;
+                swapStats[PlayerInvUpdate.DEFENSE] -= p.inv.inventory[p.inv.activeSlot].getStat("defense").value;
+                swapStats[PlayerInvUpdate.MANA] -= p.inv.inventory[p.inv.activeSlot].getStat("mana").value;
             }
             if (i <= 35) p.inv.inventory[i] = item;
             else {
                 var index = i-36;
                 if (p.inv.armor[index] != null) {
-                    swapStats[PlayerInvUpdate.DAMAGE] -= p.inv.armor[index].getStat("damage").getValue();
-                    swapStats[PlayerInvUpdate.STRENGTH] -= p.inv.armor[index].getStat("strength").getValue();
-                    swapStats[PlayerInvUpdate.CRITDAMAGE] -= p.inv.armor[index].getStat("crit-damage").getValue();
-                    swapStats[PlayerInvUpdate.CRITCHANCE] -= p.inv.armor[index].getStat("crit-chance").getValue();
-                    swapStats[PlayerInvUpdate.HEALTH] -= p.inv.armor[index].getStat("health").getValue();
-                    swapStats[PlayerInvUpdate.DEFENSE] -= p.inv.armor[index].getStat("defense").getValue();
-                    swapStats[PlayerInvUpdate.MANA] -= p.inv.armor[index].getStat("mana").getValue();
+                    swapStats[PlayerInvUpdate.DAMAGE] -= p.inv.armor[index].getStat("damage").value;
+                    swapStats[PlayerInvUpdate.STRENGTH] -= p.inv.armor[index].getStat("strength").value;
+                    swapStats[PlayerInvUpdate.CRITDAMAGE] -= p.inv.armor[index].getStat("crit-damage").value;
+                    swapStats[PlayerInvUpdate.CRITCHANCE] -= p.inv.armor[index].getStat("crit-chance").value;
+                    swapStats[PlayerInvUpdate.HEALTH] -= p.inv.armor[index].getStat("health").value;
+                    swapStats[PlayerInvUpdate.DEFENSE] -= p.inv.armor[index].getStat("defense").value;
+                    swapStats[PlayerInvUpdate.MANA] -= p.inv.armor[index].getStat("mana").value;
                 }
                 p.inv.armor[index] = item;
             }
@@ -236,13 +243,15 @@ public class PlayerManager implements TabComponent.Source {
         } catch (IOException e) { e.printStackTrace(); }
     }
 
-    @Override
-    public String[] getTabSource() {
-        return Bukkit.getOnlinePlayers()
-                .stream()
-                .map(Player::getName)
-                .toList()
-                .toArray(String[]::new);
+
+    public static CompletableFuture<Suggestions> suggest(CommandContext<CommandSourceStack> c, SuggestionsBuilder builder) {
+        Bukkit.getOnlinePlayers()
+            .stream()
+            .map(Player::getName)
+            .filter(name -> name.startsWith(getArg(c, "player-name", String.class, "")))
+            .forEach(builder::suggest);
+
+        return builder.buildFuture();
     }
 }
 

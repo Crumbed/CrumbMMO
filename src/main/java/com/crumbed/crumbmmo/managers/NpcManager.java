@@ -2,7 +2,7 @@ package com.crumbed.crumbmmo.managers;
 
 import com.comphenix.protocol.PacketType;
 import com.crumbed.crumbmmo.CrumbMMO;
-import com.crumbed.crumbmmo.commands.TabComponent;
+import com.crumbed.crumbmmo.commands.BrigadierCommand;
 import com.crumbed.crumbmmo.ecs.CEntity;
 import com.crumbed.crumbmmo.ecs.NPC;
 import com.crumbed.crumbmmo.jsonUtils.NpcAdapter;
@@ -10,12 +10,15 @@ import com.crumbed.crumbmmo.jsonUtils.NpcData;
 import com.crumbed.crumbmmo.utils.None;
 import com.crumbed.crumbmmo.utils.Option;
 import com.crumbed.crumbmmo.utils.Some;
-import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.suggestion.Suggestions;
+import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.protocol.game.*;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -23,6 +26,7 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_20_R1.CraftServer;
 import org.bukkit.craftbukkit.v1_20_R1.CraftWorld;
@@ -33,10 +37,11 @@ import java.io.*;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class NpcManager implements TabComponent.Source {
+public class NpcManager {
     public static NpcManager INSTANCE = null;
 
     @SerializedName("json-npcs")
@@ -169,8 +174,10 @@ public class NpcManager implements TabComponent.Source {
         return Option.some(npc);
     }
 
-    public boolean setLocation(String npcId, Location loc) {
-        if (!(get(npcId) instanceof Some<NPC> s)) return false;
+    public String setLocation(String npcId, Location loc) {
+        if (!(get(npcId) instanceof Some<NPC> s)) {
+            return ChatColor.RED + "Error: could not find NPC at id: " + npcId;
+        }
         var npc = s.inner();
 
         npc.raw.setPos(loc.getX(), loc.getY(), loc.getZ());
@@ -186,20 +193,24 @@ public class NpcManager implements TabComponent.Source {
         PlayerManager.INSTANCE.getPlayers().forEach(p -> {
             protocol.sendServerPacket(p.rawPlayer, packet);
         });
-        return true;
+        return ChatColor.GREEN + "Successfully moved " + npcId + " to " + loc;
     }
 
-    public boolean setId(String currentId, String newId) {
-        if (!(get(currentId) instanceof Some<NPC> s) || npcs.containsKey(newId)) return false;
+    public String setId(String currentId, String newId) {
+        if (!(get(currentId) instanceof Some<NPC> s) || npcs.containsKey(newId)) {
+            return ChatColor.RED + "Error: could not find NPC at id: " + currentId;
+        }
         var npc = s.inner();
 
         npcs.remove(currentId);
         npcs.put(newId, npc.id);
-        return true;
+        return ChatColor.GREEN + "Successfully changed id of " + currentId + " to " + newId;
     }
 
-    public boolean setName(String npcId, String newName) {
-        if (!(get(npcId) instanceof Some<NPC> s)) return false;
+    public String setName(String npcId, String newName) {
+        if (!(get(npcId) instanceof Some<NPC> s)) {
+            return ChatColor.RED + "Error: could not find NPC at id: " + npcId;
+        }
         var npc = s.inner();
 
         final var profileClass = GameProfile.class;
@@ -209,40 +220,50 @@ public class NpcManager implements TabComponent.Source {
             field.set(npc.profile, newName);
         } catch (NoSuchFieldException | IllegalAccessException e) {
             e.printStackTrace();
-            return false;
+            return ChatColor.RED + "FATAL ERROR: I have no clue how this happened, please report to staff";
         }
 
         npc.raw.displayName = newName;
 
-        return true;
+        return ChatColor.GREEN + "Successfully set name of " + npcId + " to " + newName;
     }
 
-    public boolean setSkin(String npcId, String name) {
-        if (!(get(npcId) instanceof Some<NPC> s)) return false;
+    public String setSkin(String npcId, String name) {
+        if (!(get(npcId) instanceof Some<NPC> s)) {
+            return ChatColor.RED + "Error: could not find NPC at id: " + npcId;
+        }
         var npc = s.inner();
         var skin = switch (getSkin(name)) {
             case Some<String[]> someSkin -> someSkin.inner();
             case None<String[]> ignored -> null;
         };
-        if (skin == null) return false;
+        if (skin == null) {
+            return ChatColor.RED + "Error: failed to fetch skin of player " + name;
+        }
+
 
         npc.flags.skinTexture = skin[0];
         npc.flags.skinSignature = skin[1];
         npc.raw.getGameProfile().getProperties().get("textures").clear();
         npc.raw.getGameProfile().getProperties().put("textures", new Property("textures", skin[0], skin[1]));
-        return true;
+        return ChatColor.GREEN + "Successfully set skin of " + npcId + " to that of " + name;
     }
 
 
-    public boolean setFlag(String npcId, String flag, boolean value) {
-        if (!(get(npcId) instanceof Some<NPC> s)) return false;
+    public String setFlag(String npcId, String flag, boolean value) {
+        if (!(get(npcId) instanceof Some<NPC> s)) {
+            return ChatColor.RED + "Error: could not find NPC at id: " + npcId;
+        }
         var npc = s.inner();
 
         switch (flag) {
             case "always_look" -> npc.flags.lookAtPlayer = value;
+            default -> {
+                return ChatColor.RED + "Error: unknown flag: " + flag;
+            }
         }
 
-        return true;
+        return ChatColor.GREEN + "Successfully changed set " + flag + " to " + value + " for " + npcId;
     }
 
 
@@ -254,9 +275,15 @@ public class NpcManager implements TabComponent.Source {
     }
 
 
-    @Override
-    public String[] getTabSource() {
-        return npcs.keySet().toArray(new String[0]);
+
+    public static CompletableFuture<Suggestions> suggest(CommandContext<CommandSourceStack> c, SuggestionsBuilder builder) {
+        NpcManager.INSTANCE.npcs
+            .keySet()
+            .stream()
+            .filter(x -> x.startsWith(c.getArgument(BrigadierCommand.Params.Npc.name(), String.class)))
+            .forEach(builder::suggest);
+
+        return builder.buildFuture();
     }
 }
 

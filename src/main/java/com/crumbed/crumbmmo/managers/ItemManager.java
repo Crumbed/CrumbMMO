@@ -1,8 +1,6 @@
 package com.crumbed.crumbmmo.managers;
 
 import com.crumbed.crumbmmo.CrumbMMO;
-import com.crumbed.crumbmmo.commands.BrigadierCommand;
-import com.crumbed.crumbmmo.commands.TabComponent;
 import com.crumbed.crumbmmo.ecs.CPlayer;
 import com.crumbed.crumbmmo.items.CItem;
 import com.crumbed.crumbmmo.items.ItemComponent;
@@ -11,10 +9,6 @@ import com.crumbed.crumbmmo.jsonUtils.ComponentAdapter;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
-import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.suggestion.Suggestions;
-import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.minecraft.commands.CommandSourceStack;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -30,7 +24,6 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -38,7 +31,7 @@ import java.util.stream.Stream;
 /**
  * Manager for all Item related activities
  */
-public class ItemManager implements TabComponent.Source {
+public class ItemManager {
     public static ItemManager INSTANCE = null;
 
     @SerializedName("item-ids")
@@ -198,10 +191,6 @@ public class ItemManager implements TabComponent.Source {
         return itemIds.stream();
     }
 
-    @Override
-    public String[] getTabSource() {
-        return itemIds.toArray(String[]::new);
-    }
 }
 
 

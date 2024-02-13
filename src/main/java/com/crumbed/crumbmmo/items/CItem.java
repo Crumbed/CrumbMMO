@@ -90,20 +90,20 @@ public class CItem {
     public void setName(String name) { this.name = name; }
     public Rarity getRarity() { return rarity; }
     public void setRarity(Rarity rarity) { this.rarity = rarity; }
-    public Stat getStat(String id) {
+    public Stat.Value getStat(String id) {
         var oStats = getComponent(ItemStats.class);
-        var genStat = GenericStat.fromString(id).unwrap();
-        if (oStats.isNone()) return Stat.fromGeneric(genStat, 0D);
-        return Stat.fromGeneric(genStat, oStats.unwrap().get(genStat));
+        var genStat = Stat.fromString(id).unwrap();
+        if (oStats.isNone()) return new Stat.Value(0);
+        return new Stat.Value(oStats.unwrap().get(genStat));
     }
-    public HashMap<GenericStat, Double> getStats() {
+    public HashMap<Stat, Double> getStats() {
         var oStats = getComponent(ItemStats.class);
         return switch (oStats) {
             case Some<ItemStats> s -> s.inner().getAll();
             case None<ItemStats> ignored -> new HashMap<>();
         };
     }
-    public void setStats(HashMap<GenericStat, Double> stats) {
+    public void setStats(HashMap<Stat, Double> stats) {
         var oStats = getComponent(ItemStats.class);
         switch (oStats) {
             case Some<ItemStats> s -> s.inner().setAll(stats);

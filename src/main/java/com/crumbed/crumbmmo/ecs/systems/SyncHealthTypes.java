@@ -7,6 +7,7 @@ import com.crumbed.crumbmmo.ecs.components.EntityName;
 import com.crumbed.crumbmmo.ecs.components.RawEntity;
 import com.crumbed.crumbmmo.managers.PlayerManager;
 import com.crumbed.crumbmmo.ecs.components.EntityStats;
+import com.crumbed.crumbmmo.managers.StatManager;
 import org.bukkit.Bukkit;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
@@ -38,10 +39,9 @@ public class SyncHealthTypes extends EntitySystem {
                     .unwrap();
 
             // Sync raw player max health & health scale with custom values
-            if (raw.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue() != stats.health.getBaseValue()) {
-                var healthScale = stats.health.calcHealthScale();
-                raw.getAttribute(Attribute.GENERIC_MAX_HEALTH)
-                        .setBaseValue(stats.health.getBaseValue());
+            if (raw.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue() != stats.health.max.value) {
+                var healthScale = StatManager.INSTANCE.unwrap().calcHealthScale(stats.health);
+                raw.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(stats.health.max.value);
 
                 if (raw instanceof Player) {
                     var p = (Player) raw;
@@ -55,8 +55,7 @@ public class SyncHealthTypes extends EntitySystem {
                 }
             }
             // Sync raw player health with custom health
-            if (raw.getHealth() != stats.health.getValue())
-                raw.setHealth(stats.health.getValue());
+            if (raw.getHealth() != stats.health.value) raw.setHealth(stats.health.value);
         });
     }
 }

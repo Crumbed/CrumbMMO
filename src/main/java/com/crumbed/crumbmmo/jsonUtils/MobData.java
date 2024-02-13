@@ -49,7 +49,7 @@ public class MobData {
         } catch (IOException ignored){}
         else try (Stream<String> lines = Files.lines(f.toPath())) {
             var jsonMobData = String.join("\n", lines
-                    .collect(Collectors.toList()));
+                .collect(Collectors.toList()));
             var gson = new Gson();
             return gson.fromJson(jsonMobData, MobData.class);
         } catch (IOException ignored){}
@@ -75,8 +75,8 @@ public class MobData {
             var damageAttribute = entity.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE);
 
             vanillaMob = new VanillaMob(
-                    (healthAttribute != null) ? (int) (healthAttribute.getBaseValue() * 5) : 0,
-                    (damageAttribute != null) ? (int) (damageAttribute.getBaseValue() * 5) : 0
+                (healthAttribute != null) ? (int) (healthAttribute.getBaseValue() * 5) : 0,
+                (damageAttribute != null) ? (int) (damageAttribute.getBaseValue() * 5) : 0
             );
             vanillaMobs.put(entity.getType(), vanillaMob);
         }
@@ -84,13 +84,12 @@ public class MobData {
         var entitiyData = entity.getPersistentDataContainer();
         var levelMult = (level - vanillaMob.baseLevel) * 0.35 + 1;
         var stats = new EntityStats(
-                new Damage(vanillaMob.stats.get(GenericStat.Damage) * levelMult),
-                new Strength(0D),
-                new CritDamage(0D),
-                new CritChance(0D),
-                new Health(vanillaMob.stats.get(GenericStat.Health) * levelMult),
-                new Defense(0D),
-                new Mana(0D)
+            vanillaMob.stats.get(Stat.Damage) * levelMult,
+            0D, 0D, 0D,
+            vanillaMob.stats.get(Stat.Health) * levelMult,
+            0D, 0D,
+            Stat.HealthRegen.defaultValue().value,
+            Stat.ManaRegen.defaultValue().value
         );
         var entName = switch (name) {
             case Some<String> s -> s.inner();
@@ -101,31 +100,31 @@ public class MobData {
         healthTag.setAlignment(TextDisplay.TextAlignment.CENTER);
         healthTag.setBillboard(Display.Billboard.VERTICAL);
         healthTag.setTransformationMatrix(new Matrix4f(
-                1f,0f,0f,0f,0f,1f,0f,0f,0f,0f,1f,0f,0f,0.7f,0f,1f
+            1f,0f,0f,0f,0f,1f,0f,0f,0f,0f,1f,0f,0f,0.7f,0f,1f
         ));
 
         var tag = entity.getWorld().spawn(entity.getEyeLocation(), TextDisplay.class);
         tag.setText(String.format(
-                "%s[Lv%d] %s",
-                ChatColor.GRAY,
-                level, entName));
+            "%s[Lv%d] %s",
+            ChatColor.GRAY,
+            level, entName));
         tag.setShadowed(true);
         tag.setAlignment(TextDisplay.TextAlignment.CENTER);
         tag.setBillboard(Display.Billboard.VERTICAL);
         tag.setTransformationMatrix(new Matrix4f(
-                1f,0f,0f,0f,0f,1f,0f,0f,0f,0f,1f,0f,0f,1f,0f,1f
+            1f,0f,0f,0f,0f,1f,0f,0f,0f,0f,1f,0f,0f,1f,0f,1f
         ));
 
         entity.getPassengers().forEach(Entity::remove);
         entity.addPassenger(tag);
         entity.addPassenger(healthTag);
         var newEnt = new CEntity.Builder()
-                .with(stats)
-                .with(new EntityName(entName))
-                .with(new RawEntity(entity.getUniqueId()))
-                .with(new NameTag(tag))
-                .with(new HealthTag(healthTag))
-                .create(EntityManager.INSTANCE);
+            .with(stats)
+            .with(new EntityName(entName))
+            .with(new RawEntity(entity.getUniqueId()))
+            .with(new NameTag(tag))
+            .with(new HealthTag(healthTag))
+            .create(EntityManager.INSTANCE);
 
         entitiyData.set(MOB_LEVEL, PersistentDataType.INTEGER, level);
         entitiyData.set(MOB_NAME, PersistentDataType.STRING, entity.getName());
@@ -144,7 +143,7 @@ public class MobData {
     public static class VanillaMob {
         @SerializedName("base-level")
         public final int baseLevel;
-        public final HashMap<GenericStat, Double> stats;
+        public final HashMap<Stat, Double> stats;
 
         public VanillaMob() {
             baseLevel = 1;
@@ -154,8 +153,8 @@ public class MobData {
         public VanillaMob(double maxHealth, double damage) {
             baseLevel = 1;
             stats = new HashMap<>();
-            stats.put(GenericStat.Health, maxHealth);
-            stats.put(GenericStat.Damage, damage);
+            stats.put(Stat.Health, maxHealth);
+            stats.put(Stat.Damage, damage);
         }
     }
 

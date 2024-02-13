@@ -29,33 +29,46 @@ public class StatManager {
      * @return  A DamageValue that represents the calculated damage
      */
     public DamageValue calcDamage(
-            Damage dmg,
-            Strength str,
-            CritDamage critDamage,
-            CritChance critChance,
+            double dmg,
+            double str,
+            double critDamage,
+            double critChance,
             Option<Float> attackCooldown,
             DamageType dt
     ) {
-        int initDmg = (int) ((int) (5 + dmg.getValue()) * (1 + (str.getValue() / 100)));
+        var initDmg = (int) ((int) (5 + dmg) * (1 + (str / 100)));
         var cooldown = switch (attackCooldown) {
             case Some<Float> s -> s.inner();
             case None<Float> ignored -> 1f;
         };
 
-        if (Math.random() <= critChance.getValue() && cooldown > 0.8)
-            return new DamageValue((int) (initDmg * (1 + critDamage.getValue())), true, dt);
+        if (Math.random() <= critChance && cooldown > 0.8)
+            return new DamageValue((int) (initDmg * (1 + critDamage)), true, dt);
         else if (cooldown < 0.5) initDmg /= 2;
         return new DamageValue(initDmg, false, dt);
     }
 
-    public void regenHealth(Health hp) {
-        double newHp = hp.getValue() + (hp.getBaseValue() / 100 + 1.5) * (hp.getRegenRate().unwrap() / 100);
-        hp.setValue(Math.min(newHp, hp.getBaseValue()));
+    public void regenHealth(BigStat hp) {
+        var newHp = hp.value + (hp.max.value * 0.01 + 1.5) * hp.regen.value;
+        hp.value = Math.min(newHp, hp.max.value);
     }
 
-    public void regenMana(Mana mana) {
-        double newMana = mana.getValue() + mana.getBaseValue() * 0.02;
-        mana.setValue(Math.min(newMana, mana.getBaseValue()));
+    public void regenMana(BigStat mana) {
+        var newMana = mana.value + mana.max.value * mana.regen.value;
+        mana.value = Math.min(newMana, mana.max.value);
+    }
+
+    public double calcHealthScale(BigStat health) {
+        var healthScale = 0D;
+        if (health.max.value <= 100) healthScale = 20;
+        else if (health.max.value > 100) healthScale = 40;
+        else healthScale = health.max.value / 50D + 20D;
+
+        if (healthScale % 2 > 0 && !(health.max.value % 100 == 50)) {
+            healthScale = Math.round(healthScale / 2) * 2;
+        }
+
+        return healthScale;
     }
 }
 

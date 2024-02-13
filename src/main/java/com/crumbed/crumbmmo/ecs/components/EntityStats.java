@@ -5,97 +5,110 @@ import com.crumbed.crumbmmo.stats.*;
 import com.google.gson.annotations.SerializedName;
 import org.bukkit.ChatColor;
 
+import static com.crumbed.crumbmmo.stats.Stat.Health;
+
 public class EntityStats extends EntityComponent {
     public static int ID;
     @Override
     public int id() { return ID; }
 
-    public Damage damage;
-    public Strength strength;
+    public Stat.Value damage;
+    public Stat.Value strength;
     @SerializedName("crit-damage")
-    public CritDamage critDamage;
+    public Stat.Value critDamage;
     @SerializedName("crit-chance")
-    public CritChance critChance;
-    public Health health;
-    public Defense defense;
-    public Mana mana;
+    public Stat.Value critChance;
+    public Stat.Value defense;
+    public BigStat health;
+    public BigStat mana;
 
 
     public EntityStats(
-        Damage damage,
-        Strength strength,
-        CritDamage critDamage,
-        CritChance critChance,
-        Health health,
-        Defense defense,
-        Mana mana
+        double damage,
+        double strength,
+        double critDamage,
+        double critChance,
+        double health,
+        double defense,
+        double mana,
+        double healthRegen,
+        double manaRegen
     ) {
-        this.damage = damage;
-        this.strength = strength;
-        this.critDamage = critDamage;
-        this.critChance = critChance;
-        this.health = health;
-        this.defense = defense;
-        this.mana = mana;
+        this.damage = new Stat.Value(damage);
+        this.strength = new Stat.Value(strength);
+        this.critDamage = new Stat.Value(critDamage);
+        this.critChance = new Stat.Value(critChance);
+        this.defense = new Stat.Value(defense);
+        this.health = new BigStat(health, health, healthRegen);
+        this.mana = new BigStat(mana, mana, manaRegen);
     }
 
 
 
     public void damage(DamageValue damage) {
-        damage.reduceDamage(defense.getValue() / (defense.getValue() + 100));
-        health.setValue(health.getValue() - damage.getDamage());
-        if (health.getValue() < 0) health.setValue(0);
+        damage.reduceDamage(defense.value / (defense.value + 100));
+        health.value -= damage.getDamage();
+        if (health.value < 0) health.value = 0;
     }
 
-    public void setFromGeneric(GenericStat genStat, double value) {
+    public void setFromGeneric(Stat genStat, double value) {
         switch (genStat) {
-            case Strength   :   strength.setValue(value); break;
-            case CritDamage :   critDamage.setValue(value); break;
-            case CritChance :   critChance.setValue(value); break;
-            case Health     :   health.setValue(value); break;
-            case Defense    :   defense.setValue(value); break;
-            case Mana       :   mana.setValue(value); break;
-            case Damage     :   damage.setValue(value); break;
+            case Strength -> strength.value = value;
+            case CritDamage -> critDamage.value = value;
+            case CritChance -> critChance.value = value;
+            case Health -> health.value = value;
+            case HealthRegen -> health.regen.value = value;
+            case Defense -> defense.value = value;
+            case Mana -> mana.value = value;
+            case ManaRegen -> mana.regen.value = value;
+            case Damage -> damage.value = value;
         }
     }
-    public void setMaxFromGeneric(GenericStat genStat, double value) {
+    public void setMaxFromGeneric(Stat genStat, double value) {
         switch (genStat) {
-            case Health     :   health.setBaseValue(value); break;
-            case Mana       :   mana.setBaseValue(value); break;
+            case Health -> health.max.value = value;
+            case Mana -> mana.max.value = value;
         }
     }
-    public void resetFromGeneric(GenericStat genStat) {
+    public void resetFromGeneric(Stat genStat) {
         switch (genStat) {
-            case Strength   :   strength.setValue(strength.getDefaultValue().unwrap()); break;
-            case CritDamage :   critDamage.setValue(critDamage.getDefaultValue().unwrap()); break;
-            case CritChance :   critChance.setValue(critChance.getDefaultValue().unwrap()); break;
-            case Health     :   health.setBaseValue(health.getDefaultValue().unwrap()); break;
-            case Defense    :   defense.setValue(defense.getDefaultValue().unwrap()); break;
-            case Mana       :   mana.setBaseValue(mana.getDefaultValue().unwrap()); break;
-            case Damage     :   damage.setValue(damage.getDefaultValue().unwrap()); break;
+            case Damage -> damage = Stat.Damage.defaultValue();
+            case Strength -> damage = Stat.Strength.defaultValue();
+            case CritChance -> damage = Stat.CritChance.defaultValue();
+            case CritDamage -> damage = Stat.CritDamage.defaultValue();
+            case Defense -> damage = Stat.Defense.defaultValue();
+            case Health -> health.value = Stat.Health.defaultValue().value;
+            case HealthRegen -> health.regen = Stat.HealthRegen.defaultValue();
+            case Mana -> mana.value = Stat.HealthRegen.defaultValue().value;
+            case ManaRegen -> mana.regen = Stat.HealthRegen.defaultValue();
         }
     }
 
     public String toString() {
-        return String.format(
-                "%s=-=-=-=-=-=-=-=-=-=\n"+
-                "  %sDamage: %s%d\n" +
-                "  %sStrength: %s%d\n" +
-                "  %sCrit Damage: %s%d%%\n" +
-                "  %sCrit Chance: %s%d%%\n" +
-                "  %sHealth: %s%d/%d\n" +
-                "  %sDefense: %s%d\n" +
-                "  %sMana: %s%d/%d\n" +
-                "%s=-=-=-=-=-=-=-=-=-=",
-                ChatColor.GRAY,
-                ChatColor.GRAY, ChatColor.RED, (int) damage.getValue(),
-                ChatColor.GRAY, ChatColor.RED, (int) strength.getValue(),
-                ChatColor.GRAY, ChatColor.BLUE, (int) (critDamage.getValue() * 100),
-                ChatColor.GRAY, ChatColor.BLUE, (int) (critChance.getValue() * 100),
-                ChatColor.GRAY, ChatColor.RED, (int) health.getValue(), (int) health.getBaseValue(),
-                ChatColor.GRAY, ChatColor.GREEN, (int) defense.getValue(),
-                ChatColor.GRAY, ChatColor.AQUA, (int) mana.getValue(), (int) mana.getBaseValue(),
-                ChatColor.GRAY
+        return String.format("""
+                %s=-=-=-=-=-=-=-=-=-=
+                  %sDamage: %s%d
+                  %sStrength: %s%d
+                  %sCrit Damage: %s%d%%
+                  %sCrit Chance: %s%d%%
+                  %sHealth: %s%d/%d
+                  %sDefense: %s%d
+                  %sMana: %s%d/%d
+                  %sHealth Regeneration: %s%d
+                  %sMana Regeneration: %s%d%%
+                %s=-=-=-=-=-=-=-=-=-=
+                """,
+            ChatColor.GRAY,
+            ChatColor.GRAY, ChatColor.RED, (int) damage.value,
+            ChatColor.GRAY, ChatColor.RED, (int) strength.value,
+            ChatColor.GRAY, ChatColor.BLUE, (int) (critDamage.value * 100),
+            ChatColor.GRAY, ChatColor.BLUE, (int) (critChance.value * 100),
+            ChatColor.GRAY, ChatColor.RED, (int) health.value, (int) health.max.value,
+            ChatColor.GRAY, ChatColor.GREEN, (int) defense.value,
+            ChatColor.GRAY, ChatColor.AQUA, (int) mana.value, (int) mana.max.value,
+            ChatColor.GRAY, ChatColor.RED, (int) health.regen.value,
+            ChatColor.GRAY, ChatColor.AQUA, (int) (mana.regen.value * 100),
+            ChatColor.GRAY
         );
     }
 }

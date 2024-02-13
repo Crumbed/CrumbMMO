@@ -5,8 +5,6 @@ import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.*;
 import com.crumbed.crumbmmo.commands.BrigadierCommand;
-import com.crumbed.crumbmmo.commands.BrigadierTest;
-import com.crumbed.crumbmmo.commands.CustomCommand;
 import com.crumbed.crumbmmo.ecs.components.*;
 import com.crumbed.crumbmmo.ecs.systems.*;
 import com.crumbed.crumbmmo.genericEvents.*;

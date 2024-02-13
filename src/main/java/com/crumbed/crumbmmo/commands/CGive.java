@@ -15,6 +15,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
 import static com.mojang.brigadier.arguments.StringArgumentType.string;
 
@@ -35,24 +36,13 @@ public class CGive extends BrigadierCommand {
                     return builder.buildFuture();
                 })
                 .then(arg("count", integer())
-                    .then(arg("player", string())
-                        .suggests((c, builder) -> {
-                            Bukkit.getOnlinePlayers()
-                                .stream()
-                                .map(Player::getName)
-                                .filter(name -> name.startsWith(getArg(c, "player-name", String.class, "")))
-                                .forEach(builder::suggest);
-
-                            return builder.buildFuture();
-                        }).executes(c -> {
-                            c.getSource().getBukkitSender().sendMessage("test");
-
-                            return execute(
-                                c,
-                                c.getArgument("count", Integer.class),
-                                Option.some(c.getArgument("player-name", String.class))
-                            );
-                        })
+                    .then(arg("player-name", string())
+                        .suggests(PlayerManager::suggest)
+                        .executes(c -> execute(
+                            c,
+                            c.getArgument("count", Integer.class),
+                            Option.some(c.getArgument("player-name", String.class))
+                        ))
                     ).executes(c -> execute(
                         c,
                         c.getArgument("count", Integer.class),
@@ -60,7 +50,7 @@ public class CGive extends BrigadierCommand {
                     ))
                 ).executes(c -> execute(c, 1, Option.none()))
             ).executes(c -> {
-                c.getSource().getBukkitSender().sendMessage(ChatColor.RED + "Invalid usage! /cgive <item-id> <?count> <?player>");
+                c.getSource().getBukkitSender().sendMessage(ChatColor.RED + "Invalid usage! /cgive <item-id> <?count> <?player-name>");
                 return Command.SINGLE_SUCCESS;
             });
     }
@@ -93,6 +83,7 @@ public class CGive extends BrigadierCommand {
         }
 
         player.getInventory().addItem(raw);
+        c.getSource().getBukkitSender().sendMessage(ChatColor.GREEN + "Successfully gave " + count + " " + itemId + " to " + player.getDisplayName());
         return Command.SINGLE_SUCCESS;
     }
 

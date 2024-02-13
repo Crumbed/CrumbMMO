@@ -1,10 +1,7 @@
 package com.crumbed.crumbmmo.displays;
 
-import com.crumbed.crumbmmo.commands.TabComponent;
-import com.crumbed.crumbmmo.ecs.CEntity;
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.joml.Matrix4f;
 
 import java.util.HashMap;
 import java.util.UUID;
