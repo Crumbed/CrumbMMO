@@ -17,6 +17,9 @@ public record None<T>() implements Option<T> {
     }
 
     @Override
+    public T unwrapOr(Object value) { return (T) value; }
+
+    @Override
     public String toString() {
         return "None";
     }

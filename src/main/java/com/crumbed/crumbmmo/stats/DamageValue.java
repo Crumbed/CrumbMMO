@@ -14,6 +14,7 @@ public class DamageValue {
     public void reduceDamage(double reduction) {
         value -= reduction * value;
     }
+    public void setDamage(int value) { this.value = value; }
     public int getDamage() { return value; }
     public boolean isCrit() { return crit; }
     public DamageType getDamageType() { return dt; }

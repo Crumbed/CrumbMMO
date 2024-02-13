@@ -11,6 +11,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.inventory.InventoryView;
@@ -32,6 +33,8 @@ public class PlayerInvUpdate extends EntitySystem implements Listener {
     public void onInvClose(InventoryCloseEvent e) {
         update(e.getPlayer().getUniqueId());
     }
+    @EventHandler
+    public void onDeath(PlayerDeathEvent e) { update(e.getEntity().getUniqueId()); }
 
     private void update(UUID playerUuid) {
         Option<CPlayer> p = PlayerManager
@@ -49,6 +52,8 @@ public class PlayerInvUpdate extends EntitySystem implements Listener {
     public static final int HEALTH = 4;
     public static final int DEFENSE = 5;
     public static final int MANA = 6;
+    public static final int HEALTH_REGEN = 7;
+    public static final int MANA_REGEN = 8;
 
     @Override
     public void execute(Stream<ComponentQuery.Result> results) {
@@ -68,8 +73,7 @@ public class PlayerInvUpdate extends EntitySystem implements Listener {
 
 
 
-            CItem activeItem = inv.inventory[player.getInventory().getHeldItemSlot()];
-            if (activeItem != null && !activeItem.equals(inv.inventory[inv.activeSlot]))
+            if (inv.activeSlot != player.getInventory().getHeldItemSlot())
                 inv.hasUpdated = true;
 
             if (inv.hasUpdated) {
@@ -80,22 +84,22 @@ public class PlayerInvUpdate extends EntitySystem implements Listener {
                 inv.statBoosts.addAll(Arrays.asList(inv.armor));
                 inv.statBoosts.add(inv.inventory[inv.activeSlot]);
                 for (CItem item : inv.statBoosts) {
-                    swapStats[DAMAGE] += item.getStat("damage").getValue();
-                    swapStats[STRENGTH] += item.getStat("strength").getValue();
-                    swapStats[CRITDAMAGE] += item.getStat("crit-damage").getValue();
-                    swapStats[CRITCHANCE] += item.getStat("crit-chance").getValue();
-                    swapStats[HEALTH] += item.getStat("health").getValue();
-                    swapStats[DEFENSE] += item.getStat("defense").getValue();
-                    swapStats[MANA] += item.getStat("mana").getValue();
+                    swapStats[DAMAGE] += item.getStat("damage").value;
+                    swapStats[STRENGTH] += item.getStat("strength").value;
+                    swapStats[CRITDAMAGE] += item.getStat("crit-damage").value;
+                    swapStats[CRITCHANCE] += item.getStat("crit-chance").value;
+                    swapStats[HEALTH] += item.getStat("health").value;
+                    swapStats[DEFENSE] += item.getStat("defense").value;
+                    swapStats[MANA] += item.getStat("mana").value;
                 }
 
-                stats.damage.setValue(stats.damage.getValue() + swapStats[DAMAGE]);
-                stats.strength.setValue(stats.strength.getValue() + swapStats[STRENGTH]);
-                stats.critDamage.setValue(stats.critDamage.getValue() + swapStats[CRITDAMAGE]);
-                stats.critChance.setValue(stats.critChance.getValue() + swapStats[CRITCHANCE]);
-                stats.health.setBaseValue(stats.health.getBaseValue() + swapStats[HEALTH]);
-                stats.defense.setValue(stats.defense.getValue() + swapStats[DEFENSE]);
-                stats.mana.setBaseValue(stats.mana.getBaseValue() + swapStats[MANA]);
+                stats.damage.value += swapStats[DAMAGE];
+                stats.strength.value += swapStats[STRENGTH];
+                stats.critDamage.value += swapStats[CRITDAMAGE];
+                stats.critChance.value += swapStats[CRITCHANCE];
+                stats.health.max.value += swapStats[HEALTH];
+                stats.defense.value += swapStats[DEFENSE];
+                stats.mana.max.value += swapStats[MANA];
                 inv.hasUpdated = false;
                 inv.statBoosts.clear();
             }

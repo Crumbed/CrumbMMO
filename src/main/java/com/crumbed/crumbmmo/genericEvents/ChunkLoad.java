@@ -2,6 +2,7 @@ package com.crumbed.crumbmmo.genericEvents;
 
 
 import com.crumbed.crumbmmo.CrumbMMO;
+import com.crumbed.crumbmmo.ecs.NPC;
 import com.crumbed.crumbmmo.ecs.components.RawEntity;
 import com.crumbed.crumbmmo.managers.EntityManager;
 import com.crumbed.crumbmmo.utils.None;
@@ -66,6 +67,7 @@ public class ChunkLoad implements Listener {
             var cEnt = EntityManager
                     .INSTANCE
                     .getEntity(id);
+            if (cEnt.isSome() && cEnt.unwrap() instanceof NPC) continue;
             if (cEnt.isSome() && switch (cEnt.unwrap().getComponent(RawEntity.class)) {
                 case Some<RawEntity> s -> s.inner().id.equals(entity.getUniqueId());
                 case None<RawEntity> ignored -> false;

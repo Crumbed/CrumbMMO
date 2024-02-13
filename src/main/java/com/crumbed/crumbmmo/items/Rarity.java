@@ -20,28 +20,26 @@ public enum Rarity {
     Mythic;
 
     public ChatColor color() {
-        switch (this) {
-            case Contraband :   return ChatColor.RED;
-            case Common     :   return ChatColor.WHITE;
-            case Uncommon   :   return ChatColor.GREEN;
-            case Rare       :   return ChatColor.BLUE;
-            case Epic       :   return ChatColor.DARK_PURPLE;
-            case Legendary  :   return ChatColor.GOLD;
-            case Mythic     :   return ChatColor.LIGHT_PURPLE;
-        }
-        return ChatColor.RED;
+        return switch (this) {
+            case Contraband -> ChatColor.RED;
+            case Common -> ChatColor.WHITE;
+            case Uncommon -> ChatColor.GREEN;
+            case Rare -> ChatColor.BLUE;
+            case Epic -> ChatColor.DARK_PURPLE;
+            case Legendary -> ChatColor.GOLD;
+            case Mythic -> ChatColor.LIGHT_PURPLE;
+        };
     }
     public String toString() {
-        switch (this) {
-            case Contraband :   return "contraband";
-            case Common     :   return "common";
-            case Uncommon   :   return "uncommon";
-            case Rare       :   return "rare";
-            case Epic       :   return "epic";
-            case Legendary  :   return "legendary";
-            case Mythic     :   return "mythic";
-        }
-        return null;
+        return switch (this) {
+            case Contraband -> "Contraband";
+            case Common -> "Common";
+            case Uncommon -> "Uncommon";
+            case Rare -> "Rare";
+            case Epic -> "Epic";
+            case Legendary -> "Legendary";
+            case Mythic -> "Mythic";
+        };
     }
 
     public static Rarity fromString(String rarity) {

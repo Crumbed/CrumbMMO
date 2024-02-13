@@ -7,6 +7,7 @@ public sealed interface Option<T> permits Some, None {
     boolean isNone();
 
     T unwrap() throws NullPointerException;
+    T unwrapOr(Object value);
 
     static <T> Option<T> some(T inner) { return new Some<>(inner); }
     static <T> Option<T> none() { return new None<>(); }

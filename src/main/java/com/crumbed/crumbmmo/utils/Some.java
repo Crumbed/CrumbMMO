@@ -17,6 +17,9 @@ public record Some<T>(T inner) implements Option<T> {
     }
 
     @Override
+    public T unwrapOr(Object ignored) { return inner; }
+
+    @Override
     public String toString() {
         return inner.toString();
     }

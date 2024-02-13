@@ -23,8 +23,8 @@ public class SyncHealthTag extends EntitySystem {
             var tag = r.getComponent(HealthTag.class).unwrap();
 
             tag.setHealth(
-                    (int) stats.health.getValue(),
-                    (int) stats.health.getBaseValue()
+                    (int) stats.health.value,
+                    (int) stats.health.max.value
             );
         });
     }
