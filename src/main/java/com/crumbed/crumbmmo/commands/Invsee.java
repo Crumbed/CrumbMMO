@@ -22,9 +22,6 @@ import org.bukkit.inventory.meta.SkullMeta;
 import org.checkerframework.checker.units.qual.C;
 
 public class Invsee extends BrigadierCommand {
-    public static TabComponent[][] ARGS = new TabComponent[][] {
-            { new TabComponent(TabComponent.Type.PlayerName, Option.some(PlayerManager.INSTANCE), false) }
-    };
 
 
     @Override

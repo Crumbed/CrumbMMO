@@ -181,7 +181,7 @@ public class ItemManager {
                 menuGlassItem
             );
 
-            ins.itemReg.put("black_menu_glass", menuGlass);
+            ins.itemReg.put("menu_glass", menuGlass);
             return ins;
         }
     }
