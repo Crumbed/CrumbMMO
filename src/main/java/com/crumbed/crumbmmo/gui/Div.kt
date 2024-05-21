@@ -2,6 +2,8 @@ package com.crumbed.crumbmmo.gui
 
 import net.md_5.bungee.api.ChatColor
 import org.bukkit.Bukkit
+import org.bukkit.Material
+import org.bukkit.inventory.ItemStack
 import java.util.LinkedList
 
 
@@ -24,6 +26,7 @@ class Vec2(x: Int = 1, y: Int = 1) {
 abstract class Component {
     var pos = Vec2()
     var size = Vec2()
+    var background = ItemStack(Material.AIR)
 
     fun pos(x: Int, y: Int) {
         if (x < 0 || x > 8) {
