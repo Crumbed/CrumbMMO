@@ -2,8 +2,6 @@ package com.crumbed.crumbmmo.commands;
 
 import com.crumbed.crumbmmo.managers.PlayerManager;
 import com.crumbed.crumbmmo.ecs.CPlayer;
-import com.crumbed.crumbmmo.stats.GenericStat;
-import com.crumbed.crumbmmo.stats.Stat;
 import com.crumbed.crumbmmo.utils.Option;
 import com.crumbed.crumbmmo.utils.Some;
 import com.mojang.brigadier.Command;
@@ -28,22 +26,23 @@ public class CmmoCmd extends BrigadierCommand {
             .then(literal("stats")
                 .then(arg("player-name", string())
                     .suggests(PlayerManager::suggest)
-                    .executes(CmmoCmd::executeStats)
-                ).executes(CmmoCmd::executeStats)
+                    .executes(c -> executeStats(c, true))
+                ).executes(c -> executeStats(c, false))
             ).executes(c -> {
                 c.getSource().getBukkitSender().sendMessage(ChatColor.RED + "Invalid usage! /cmmo <[stats]>");
                 return Command.SINGLE_SUCCESS;
             });
     }
 
-    public static int executeStats(CommandContext<CommandSourceStack> c) {
-        var playerName = c.getArgument("player-name", String.class);
-        var optPlayer = switch(playerName) {
-            case null -> (c.getSource().getBukkitSender() instanceof Player p)
-                ? PlayerManager.INSTANCE.getPlayer(p)
-                : Option.<CPlayer>none();
-            case String name -> PlayerManager.INSTANCE.getPlayer(name);
+    public static int executeStats(CommandContext<CommandSourceStack> c, boolean player) {
+        var optPlayer = Option.<CPlayer>none();
+        if (player)
+            optPlayer = PlayerManager.INSTANCE.getPlayer(c.getArgument(Params.Player+"", String.class));
+        else optPlayer = switch (c.getSource().getBukkitSender()) {
+            case Player p -> PlayerManager.INSTANCE.getPlayer(p);
+            default -> Option.none();
         };
+
 
         if (!(optPlayer instanceof Some<CPlayer> p)) {
             c.getSource().getBukkitSender().sendMessage(ChatColor.RED + "Could not find player");

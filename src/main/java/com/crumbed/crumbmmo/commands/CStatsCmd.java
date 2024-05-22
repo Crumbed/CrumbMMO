@@ -2,7 +2,7 @@ package com.crumbed.crumbmmo.commands;
 
 import com.crumbed.crumbmmo.ecs.CPlayer;
 import com.crumbed.crumbmmo.managers.PlayerManager;
-import com.crumbed.crumbmmo.stats.GenericStat;
+import com.crumbed.crumbmmo.stats.Stat;
 import com.crumbed.crumbmmo.utils.Option;
 import com.crumbed.crumbmmo.utils.Some;
 import com.mojang.brigadier.Command;
@@ -33,12 +33,12 @@ public class CStatsCmd extends BrigadierCommand {
             .requires(s -> true)
             .then(Params.Player.arg()
                 .suggests(PlayerManager::suggest)
-                .executes(CmmoCmd::executeStats)
+                .executes(c -> CmmoCmd.executeStats(c, true))
             )
             .then(literal("set")
                 .requires(s -> s.getBukkitSender().hasPermission("cmmo.admin"))
                 .then(Params.Stat.arg()
-                    .suggests(GenericStat::suggest)
+                    .suggests(Stat::suggest)
                     .then(arg("value", doubleArg())
                         .then(Params.Player.arg()
                             .suggests(PlayerManager::suggest)
@@ -50,7 +50,7 @@ public class CStatsCmd extends BrigadierCommand {
             .then(literal("reset")
                 .requires(s -> s.getBukkitSender().hasPermission("cmmo.admin"))
                 .then(Params.Stat.arg()
-                    .suggests(GenericStat::suggest)
+                    .suggests(Stat::suggest)
                     .then(Params.Player.arg()
                         .suggests(PlayerManager::suggest)
                         .executes(CStatsCmd::executeReset)
@@ -61,7 +61,7 @@ public class CStatsCmd extends BrigadierCommand {
                     .executes(CStatsCmd::executeReset)
                 ).executes(CStatsCmd::executeReset)
             )
-            .executes(CmmoCmd::executeStats);
+            .executes(c -> CmmoCmd.executeStats(c, false));
     }
 
 
@@ -80,6 +80,7 @@ public class CStatsCmd extends BrigadierCommand {
             case String name -> PlayerManager.INSTANCE.getPlayer(name);
         };
 
+
         if (!(optPlayer instanceof Some<CPlayer> somePlayer)) {
             c.getSource().getBukkitSender().sendMessage(ChatColor.RED + "Could not find player");
             return Command.SINGLE_SUCCESS;
@@ -92,7 +93,7 @@ public class CStatsCmd extends BrigadierCommand {
             stat = stat.substring(4);
         }
 
-        var optGenStat = GenericStat.fromString(stat);
+        var optGenStat = Stat.fromString(stat);
         if (optGenStat.isNone()) {
             c.getSource().getBukkitSender().sendMessage(ChatColor.RED + "Syntax error: invalid stat-id \"" + stat + "\"");
             return Command.SINGLE_SUCCESS;
@@ -125,7 +126,7 @@ public class CStatsCmd extends BrigadierCommand {
 
 
         if (stat == null) {
-            Stream.of(GenericStat.values()).forEach(s -> p.getStats().resetFromGeneric(s));
+            Stream.of(Stat.values()).forEach(s -> p.getStats().resetFromGeneric(s));
 
             p.inv.hasUpdated = true;
             return Command.SINGLE_SUCCESS;
@@ -134,7 +135,7 @@ public class CStatsCmd extends BrigadierCommand {
             stat = stat.substring(4);
         }
 
-        var optGenStat = GenericStat.fromString(stat);
+        var optGenStat = Stat.fromString(stat);
         if (optGenStat.isNone()) {
             c.getSource().getBukkitSender().sendMessage(ChatColor.RED + "Syntax error: invalid stat-id \"" + stat + "\"");
             return Command.SINGLE_SUCCESS;

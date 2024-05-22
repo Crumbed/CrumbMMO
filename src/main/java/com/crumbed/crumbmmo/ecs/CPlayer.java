@@ -48,7 +48,7 @@ public class CPlayer extends CEntity {
             .of(Stat.values())
             .map(Stat::defaultValue)
             .map(x -> x.value)
-            .toList();
+            .collect(Collectors.toCollection(ArrayList::new));
         p.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(100);
         p.setHealth(100);
 

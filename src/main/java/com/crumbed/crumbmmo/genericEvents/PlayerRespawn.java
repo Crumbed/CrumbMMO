@@ -17,7 +17,7 @@ public class PlayerRespawn implements Listener {
         if (!(optPlayer instanceof Some<CPlayer> some)) return;
         var player = some.inner();
 
-        player.getStats().health.setValue(player.getStats().health.getBaseValue());
+        player.getStats().health.value = player.getStats().health.max.value;
     }
 
 }

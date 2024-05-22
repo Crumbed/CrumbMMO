@@ -39,7 +39,7 @@ public class RawEntity extends EntityComponent {
 
         return switch (e) {
             case LivingEntity living -> Option.some(living);
-            case default -> Option.none();
+            default -> Option.none();
         };
     }
 }

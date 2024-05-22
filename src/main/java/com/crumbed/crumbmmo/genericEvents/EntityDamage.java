@@ -57,10 +57,10 @@ public class EntityDamage implements Listener {
 
         var dStats = damager.getComponent(EntityStats.class).unwrap();
         var damage = StatManager.INSTANCE.unwrap().calcDamage(
-                dStats.damage,
-                dStats.strength,
-                dStats.critDamage,
-                dStats.critChance,
+                dStats.damage.value,
+                dStats.strength.value,
+                dStats.critDamage.value,
+                dStats.critChance.value,
                 (e.getDamager() instanceof Player p)
                         ? Option.some(p.getAttackCooldown())
                         : Option.none(),
@@ -74,7 +74,7 @@ public class EntityDamage implements Listener {
             attackIndicator(damage, (LivingEntity) e.getEntity());
         }
 
-        if (damageeStats.health.getValue() <= 0) {
+        if (damageeStats.health.value <= 0) {
             var ent = (LivingEntity) e.getEntity();
             ent.damage(ent.getHealth());
             return;
