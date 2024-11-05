@@ -9,9 +9,13 @@ import com.crumbed.crumbmmo.jsonUtils.ComponentAdapter;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.SwordItem;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.craftbukkit.v1_20_R4.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_20_R4.util.CraftMagicNumbers;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -173,13 +177,6 @@ public class ItemManager {
             var menuGlassMeta = menuGlassItem.getItemMeta();
             menuGlassMeta.setDisplayName(" ");
             menuGlassItem.setItemMeta(menuGlassMeta);
-            var menuGlass = new CItem("menu_glass",
-                " ",
-                Rarity.Contraband,
-                "null",
-                "null",
-                menuGlassItem
-            );
 
             ins.itemReg.put("black_menu_glass", menuGlass);
             return ins;

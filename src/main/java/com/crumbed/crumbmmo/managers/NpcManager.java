@@ -28,9 +28,9 @@ import net.minecraft.server.level.ServerPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_20_R1.CraftServer;
-import org.bukkit.craftbukkit.v1_20_R1.CraftWorld;
-import org.bukkit.craftbukkit.v1_20_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_20_R4.CraftServer;
+import org.bukkit.craftbukkit.v1_20_R4.CraftWorld;
+import org.bukkit.craftbukkit.v1_20_R4.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
 import java.io.*;
@@ -103,7 +103,7 @@ public class NpcManager {
         var server = (MinecraftServer) ((CraftServer) Bukkit.getServer()).getServer();
         var world = ((CraftWorld) l.getWorld()).getHandle();
         var profile = new GameProfile(UUID.randomUUID(), name);
-        var npc = new ServerPlayer(server, world, profile);
+        var npc = new ServerPlayer(server, world, profile, null);
         npc.moveTo(l.getX(), l.getY(), l.getZ(), l.getYaw(), l.getPitch());
         addPacket(npc);
 
@@ -117,7 +117,6 @@ public class NpcManager {
         PlayerManager.INSTANCE.getPlayers().forEach(p -> {
             var con = ((CraftPlayer) p.rawPlayer).getHandle().connection;
             con.send(new ClientboundPlayerInfoUpdatePacket(ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER, npc));
-            con.send(new ClientboundAddPlayerPacket(npc));
             con.send(new ClientboundRotateHeadPacket(npc, (byte) (npc.getBukkitYaw() * 256 / 360)));
             con.send(new ClientboundSetEntityDataPacket(npc.getId(), List.of(dataItem.value())));
         });
@@ -133,7 +132,6 @@ public class NpcManager {
 
             var con = ((CraftPlayer) p).getHandle().connection;
             con.send(new ClientboundPlayerInfoUpdatePacket(ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER, npc));
-            con.send(new ClientboundAddPlayerPacket(npc));
             con.send(new ClientboundRotateHeadPacket(npc, (byte) (npc.getBukkitYaw() * 256 / 360)));
             con.send(new ClientboundSetEntityDataPacket(npc.getId(), List.of(dataItem.value())));
         }

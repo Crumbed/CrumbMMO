@@ -1,11 +1,9 @@
 package com.crumbed.crumbmmo.items;
 
+import net.minecraft.core.component.DataComponents;
+
 import java.util.ArrayList;
 
-public abstract class ItemComponent {
-    public static int ID;
-
-    public abstract int id();
-
-    public abstract ArrayList<String> toLore();
+public interface ItemComponent {
+    ArrayList<String> toLore();
 }

@@ -42,6 +42,18 @@ public enum Rarity {
         };
     }
 
+    public String id() {
+        return switch (this) {
+            case Contraband -> "contraband";
+            case Common -> "common";
+            case Uncommon -> "uncommon";
+            case Rare -> "rare";
+            case Epic -> "epic";
+            case Legendary -> "legendary";
+            case Mythic -> "mythic";
+        };
+    }
+
     public static Rarity fromString(String rarity) {
         switch (rarity.toLowerCase()) {
             case "contraband"   :   return Contraband;

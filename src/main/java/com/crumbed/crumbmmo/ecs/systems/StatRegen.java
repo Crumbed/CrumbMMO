@@ -30,12 +30,14 @@ public class StatRegen extends EntitySystem {
                     .unwrap();
 
             // regen health
-            if (stats.health.value < stats.health.max.value) StatManager
+            if (!entity.unwrap().isInvulnerable()) {
+                if (stats.health.value < stats.health.max.value) StatManager
                     .INSTANCE
                     .unwrap()
                     .regenHealth(stats.health);
-            else if (stats.health.value > stats.health.max.value)
-                stats.health.value = stats.health.max.value;
+                else if (stats.health.value > stats.health.max.value)
+                    stats.health.value = stats.health.max.value;
+            }
 
             // regen mana
             if (stats.mana.value < stats.mana.max.value) StatManager

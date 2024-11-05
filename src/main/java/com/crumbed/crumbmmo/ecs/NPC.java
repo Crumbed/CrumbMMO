@@ -9,8 +9,8 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_20_R1.CraftServer;
-import org.bukkit.craftbukkit.v1_20_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_20_R4.CraftServer;
+import org.bukkit.craftbukkit.v1_20_R4.CraftWorld;
 
 import java.util.UUID;
 
@@ -37,7 +37,7 @@ public class NPC extends CEntity {
         profile.getProperties().get("textures").clear();
         profile.getProperties().put("textures",
                 new Property("textures", data.flags.skinTexture, data.flags.skinSignature));
-        var npc = new ServerPlayer(server, world, profile);
+        var npc = new ServerPlayer(server, world, profile, null);
         npc.moveTo(data.loc.getX(), data.loc.getY(), data.loc.getZ(), data.loc.getYaw(), data.loc.getPitch());
 
         raw = npc;

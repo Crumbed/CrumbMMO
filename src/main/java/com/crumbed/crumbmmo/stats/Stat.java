@@ -100,15 +100,15 @@ public enum Stat {
 
     public String display(double value) {
         return switch (this) {
-            case Damage -> ChatColor.GRAY + "Damage: " + ChatColor.RED + "+" + (int) value;
-            case Strength -> ChatColor.GRAY + "Strength: " + ChatColor.RED + "+" + (int) value;
-            case CritDamage -> ChatColor.GRAY + "Crit Damage: " + ChatColor.BLUE + "+" + (int) value * 100 + "%";
-            case CritChance -> ChatColor.GRAY + "Crit Chance: " + ChatColor.BLUE + "+" + (int) value * 100 + "%";
-            case Health -> ChatColor.GRAY + "Health: " + ChatColor.GREEN + "+" + (int) value;
-            case Defense -> ChatColor.GRAY + "Defense: " + ChatColor.GREEN + "+" + (int) value;
-            case Mana -> ChatColor.GRAY + "Mana: " + ChatColor.GREEN + "+" + (int) value;
-            case HealthRegen -> ChatColor.GRAY + "Health Regeneration: " + ChatColor.RED + "+" + (int) value;
-            case ManaRegen -> ChatColor.GRAY + "Mana Regeneration: " + ChatColor.AQUA + "+" + (int) value * 100 + "%";
+            case Damage -> STR."\{ChatColor.GRAY}Damage: \{ChatColor.RED}+\{(int) value}";
+            case Strength -> STR."\{ChatColor.GRAY}Strength: \{ChatColor.RED}+\{(int) value}";
+            case CritDamage -> STR."\{ChatColor.GRAY}Crit Damage: \{ChatColor.BLUE}+\{(int) value * 100}%";
+            case CritChance -> STR."\{ChatColor.GRAY}Crit Chance: \{ChatColor.BLUE}+\{(int) value}%";
+            case Health -> STR."\{ChatColor.GRAY}Health: \{ChatColor.GREEN}+\{(int) value}";
+            case Defense -> STR."\{ChatColor.GRAY}Defense: \{ChatColor.GREEN}+\{(int) value}";
+            case Mana -> STR."\{ChatColor.GRAY}Mana: \{ChatColor.GREEN}+\{(int) value}";
+            case HealthRegen -> STR."\{ChatColor.GRAY}Health Regeneration: \{ChatColor.RED}+\{(int) value}";
+            case ManaRegen -> STR."\{ChatColor.GRAY}Mana Regeneration: \{ChatColor.AQUA}+\{(int) value * 100}%";
         };
     }
 
