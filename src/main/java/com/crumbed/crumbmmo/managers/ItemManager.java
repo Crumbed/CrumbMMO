@@ -4,25 +4,26 @@ import com.crumbed.crumbmmo.CrumbMMO;
 import com.crumbed.crumbmmo.ecs.CPlayer;
 import com.crumbed.crumbmmo.items.CItem;
 import com.crumbed.crumbmmo.items.ItemComponent;
-import com.crumbed.crumbmmo.items.Rarity;
 import com.crumbed.crumbmmo.jsonUtils.ComponentAdapter;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.SwordItem;
+import de.tr7zw.nbtapi.NBT;
+import de.tr7zw.nbtapi.iface.NBTHandler;
+import de.tr7zw.nbtapi.iface.ReadWriteNBT;
+import de.tr7zw.nbtapi.iface.ReadableNBT;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_20_R4.inventory.CraftItemStack;
-import org.bukkit.craftbukkit.v1_20_R4.util.CraftMagicNumbers;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -38,156 +39,66 @@ import java.util.stream.Stream;
 public class ItemManager {
     public static ItemManager INSTANCE = null;
 
-    @SerializedName("item-ids")
     private ArrayList<String> itemIds;
-    private JsonObject items;
-    /**
-     * map from item-id -> CItem
-     */
-    public transient HashMap<String, CItem> itemReg;
-    public transient CrumbMMO plugin;
+    private ReadWriteNBT items;
+    private HashMap<String, ReadableNBT> itemReg;
+    public CrumbMMO plugin;
 
     public ItemManager(CrumbMMO plugin) {
         itemIds = new ArrayList<>();
-        items = new JsonObject();
         itemReg = new HashMap<>();
         this.plugin = plugin;
     }
 
+    public static ItemManager init(CrumbMMO plugin) {
+        if (INSTANCE != null) return INSTANCE;
+        var f = new File(plugin.getDataFolder(), "custom_items.snbt");
 
+        var ins = new ItemManager(plugin);
+        if (!f.exists()) try {
+            f.createNewFile();
+            var writer = new FileWriter(f);
+            writer.write("{item_ids: [], items: {}}");
+            writer.close();
+            return ins;
+        } catch (IOException ignored){}
+        else try (var lines = Files.lines(f.toPath())) {
+            var customItems = String.join("\n", lines
+                .collect(Collectors.toList()));
+            var nbt = NBT.parseNBT(customItems);
+            ins.itemIds = new ArrayList<>(nbt.getStringList("item_ids").toListCopy());
+            ins.items = nbt.getOrCreateCompound("items");
+        } catch (IOException ignored){}
+        assert ins != null;
+
+        ins.itemReg = new HashMap<>();
+
+        for (String id : ins.itemIds) {
+            Bukkit.getLogger().info("Attempting to load item: " + id);
+            var item = ins.items.getCompound(id);
+            ins.itemReg.put(id, item);
+        }
+
+        final var menuGlassNbt = "{name: \" \", item_id: \"black_menu_glass\", rarity: \"\", material: \"black_stained_glass_pane\"}";
+        ins.itemReg.put("black_menu_glass", NBT.parseNBT(menuGlassNbt));
+        return ins;
+    }
 
 
     public static void reload() {
         var plugin = INSTANCE.plugin;
-        INSTANCE = new Builder(plugin).create();
+        INSTANCE = null;
+        INSTANCE = init(plugin);
     }
 
-
-    public void checkOutdatedItems(Inventory inv) {
-        for (int i = 0; i < inv.getSize(); ++i) {
-            ItemStack item = inv.getItem(i);
-            assert item != null;
-            if (item.getType() == Material.AIR) continue;
-            ItemMeta meta = item.getItemMeta();
-            assert meta != null;
-            List<String> lore = meta.getLore();
-            if (!lore.get(lore.size()-1).contains("id: ")) continue;
-
-            String id = lore.get(lore.size()-1).substring(6);
-            if (!itemReg.containsKey(id)) {
-                inv.setItem(i, new ItemStack(Material.AIR));
-                if (!(inv instanceof PlayerInventory)) continue;
-                ((PlayerInventory) inv)
-                    .getHolder()
-                    .sendMessage(ChatColor.RED + "An unrecognised item was removed from your inventory, please contact staff if you believe this was a mistake.");
-                Bukkit.getLogger().info(item.getItemMeta().getDisplayName() + ", was removed from " + ((PlayerInventory) inv).getHolder().getName() + "'s inventory.");
-                continue;
-            }
-            CItem freshItem = itemReg.get(id);
-            CItem currItem = CItem.fromItemStack(item).unwrap();
-
-            if (!currItem.getName().equals(freshItem.getName()) ||
-                !currItem.getMaterial().equals(freshItem.getMaterial()) ||
-                !currItem.getStats().equals(freshItem.getStats()) ||
-                !currItem.getRarity().equals(freshItem.getRarity())
-            ) {
-                inv.setItem(i, freshItem.getRawItem());
-                if (inv instanceof PlayerInventory) {
-                    CPlayer player = PlayerManager
-                        .INSTANCE
-                        .getPlayer(((PlayerInventory) inv)
-                            .getHolder()
-                            .getUniqueId())
-                        .unwrap();
-                    PlayerManager
-                        .INSTANCE
-                        .syncPlayerInv(player);
-                }
-            }
-        }
+    public CItem getItem(String id) {
+        var cnbt = itemReg.get(id);
+        return new CItem(cnbt);
     }
-
-    public ItemStack createItem(CItem citem) {
-        ItemStack item = new ItemStack(citem.getMaterial());
-        ChatColor color = citem.getRarity().color();
-        ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(color + citem.getName());
-        meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-        meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
-        meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
-        meta.setUnbreakable(true);
-        meta.setLore(citem.getFullLore());
-        item.setItemMeta(meta);
-
-        return item;
-    }
-
-
-    public static class Builder {
-        public CrumbMMO plugin;
-
-        public Builder(CrumbMMO plugin) {
-            this.plugin = plugin;
-        }
-
-        private int componentCount = 0;
-        public <T extends ItemComponent> Builder with(Class<T> component) {
-            try {
-                component.getField("ID").setInt(null, componentCount);
-                componentCount += 1;
-            } catch(NoSuchFieldException | IllegalAccessException e) {
-                e.printStackTrace();
-            }
-
-            return this;
-        }
-
-        public ItemManager create() {
-            if (INSTANCE != null) return INSTANCE;
-            var f = new File(plugin.getDataFolder(), "CustomItems.json");
-
-            ItemManager ins = null;
-            if (!f.exists()) try {
-                f.createNewFile();
-                return new ItemManager(plugin);
-            } catch (IOException ignored){}
-            else try (var lines = Files.lines(f.toPath())) {
-                var customItems = String.join("\n", lines
-                    .collect(Collectors.toList()));
-                var gson = new Gson();
-                ins = gson.fromJson(customItems, ItemManager.class);
-            } catch (IOException ignored){}
-            assert ins != null;
-            ins.itemReg = new HashMap<>();
-            var gson = new Gson().newBuilder()
-                .registerTypeAdapter(ItemComponent.class, new ComponentAdapter<ItemComponent>())
-                .create();
-
-            for (String id : ins.itemIds) {
-                Bukkit.getLogger().info("Attempting to load item: " + id);
-                var jsonItem = ins.items.get(id);
-                var item = gson.fromJson(jsonItem, CItem.class);
-                item.initLoaded(ins);
-
-                ins.itemReg.put(id, item);
-            }
-            Bukkit.getLogger().info(ins.itemReg.containsKey("cleaver") +"");
-
-            var menuGlassItem = new ItemStack(Material.BLACK_STAINED_GLASS_PANE);
-            var menuGlassMeta = menuGlassItem.getItemMeta();
-            menuGlassMeta.setDisplayName(" ");
-            menuGlassItem.setItemMeta(menuGlassMeta);
-
-            ins.itemReg.put("black_menu_glass", menuGlass);
-            return ins;
-        }
-    }
-
 
     public Stream<String> getItemIds() {
         return itemIds.stream();
     }
-
 }
 
 

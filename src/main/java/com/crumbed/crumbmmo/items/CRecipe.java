@@ -48,9 +48,8 @@ public class CRecipe {
                 }
 
                 String id;
-                var optItem = CItem.fromItemStack(mItem);
-                if (!(optItem instanceof Some<CItem> cItem)) return null;
-                id = cItem.inner().getId().substring(cItem.inner().getId().indexOf(':') + 1);
+                var cItem = new CItem(mItem);
+                id = cItem.getId().substring(cItem.getId().indexOf(':') + 1);
                 var rItem = new CRecipe.RecipeItem(id, mItem.getAmount());
 
                 for (var set : key.entrySet()) {

@@ -3,8 +3,10 @@ package com.crumbed.crumbmmo.items;
 import com.crumbed.crumbmmo.items.components.ItemStats;
 import com.crumbed.crumbmmo.stats.*;
 import de.tr7zw.nbtapi.NBT;
+import de.tr7zw.nbtapi.iface.ReadWriteNBT;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
@@ -19,6 +21,28 @@ public class CItem {
     private ItemStats stats;
     private ArrayList<String> lore;
 
+    public CItem(ReadWriteNBT nbt) {
+        itemId = nbt.getString("item_id");
+        name = nbt.getString("name");
+        rarity = Rarity.fromString(nbt.getString("rarity"));
+        material = Material.getMaterial(nbt.getString("material"));
+        stats = nbt.get("stats", ItemStats.handler);
+        lore = new ArrayList<>(nbt.getStringList("lore").toListCopy());
+
+        raw = new ItemStack(material);
+        NBT.modify(raw, (inbt) -> {
+            inbt.mergeCompound(nbt);
+        });
+
+        var meta = raw.getItemMeta();
+        meta.setDisplayName(rarity.color() + name);
+        meta.setLore(getFullLore());
+        meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+        meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
+        meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
+        meta.setUnbreakable(true);
+        raw.setItemMeta(meta);
+    }
     public CItem(ItemStack item) {
         raw = item;
         var nbt = NBT.readNbt(item);

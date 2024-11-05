@@ -4,6 +4,7 @@ import com.google.gson.annotations.SerializedName;
 import org.bukkit.ChatColor;
 
 public enum Rarity {
+    None,
     @SerializedName("contraband")
     Contraband,
     @SerializedName("common")
@@ -22,7 +23,7 @@ public enum Rarity {
     public ChatColor color() {
         return switch (this) {
             case Contraband -> ChatColor.RED;
-            case Common -> ChatColor.WHITE;
+            case Common, None -> ChatColor.WHITE;
             case Uncommon -> ChatColor.GREEN;
             case Rare -> ChatColor.BLUE;
             case Epic -> ChatColor.DARK_PURPLE;
@@ -32,6 +33,7 @@ public enum Rarity {
     }
     public String toString() {
         return switch (this) {
+            case None -> "";
             case Contraband -> "Contraband";
             case Common -> "Common";
             case Uncommon -> "Uncommon";
@@ -44,6 +46,7 @@ public enum Rarity {
 
     public String id() {
         return switch (this) {
+            case None -> "";
             case Contraband -> "contraband";
             case Common -> "common";
             case Uncommon -> "uncommon";
@@ -56,6 +59,7 @@ public enum Rarity {
 
     public static Rarity fromString(String rarity) {
         switch (rarity.toLowerCase()) {
+            case ""             :   return None;
             case "contraband"   :   return Contraband;
             case "common"       :   return Common;
             case "uncommon"     :   return Uncommon;
