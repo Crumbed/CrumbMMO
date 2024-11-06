@@ -6,6 +6,7 @@ import com.crumbed.crumbmmo.ecs.CPlayer;
 import com.crumbed.crumbmmo.ecs.systems.PlayerInvUpdate;
 import com.crumbed.crumbmmo.items.CItem;
 import com.crumbed.crumbmmo.jsonUtils.JsonPlayerData;
+import com.crumbed.crumbmmo.stats.Stat;
 import com.crumbed.crumbmmo.utils.None;
 import com.crumbed.crumbmmo.utils.Option;
 import com.crumbed.crumbmmo.utils.Some;
@@ -176,6 +177,7 @@ public class PlayerManager {
         var items = inv.getContents();
         var heldItemSlot = inv.getHeldItemSlot();
         for (var i = 0; i < items.length; i++) {
+            /*
             var optItem = CItem.fromItemStack(items[i]);
             CItem item;
             if (optItem instanceof Some<CItem> some) {
@@ -185,30 +187,33 @@ public class PlayerManager {
                 Bukkit.getLogger().info(items[i].getItemMeta().getDisplayName() + ", was removed from " + p.rawPlayer.getName() + "'s inventory.");
                 continue;
             }
+            */
+            // might error if item is null, idc ill figure it out later im too brain dead to think rn
+            var item = new CItem(items[i]);
 
             //Bukkit.getLogger().info(i + ": " + item.unwrap().getName());
             //Bukkit.getLogger().info("held slot: " + heldItemSlot);
 
             if (p.inv.inventory[p.inv.activeSlot] != null && i == heldItemSlot) {
-                swapStats[PlayerInvUpdate.DAMAGE] -= p.inv.inventory[p.inv.activeSlot].getStat("damage").value;
-                swapStats[PlayerInvUpdate.STRENGTH] -= p.inv.inventory[p.inv.activeSlot].getStat("strength").value;
-                swapStats[PlayerInvUpdate.CRITDAMAGE] -= p.inv.inventory[p.inv.activeSlot].getStat("crit-damage").value;
-                swapStats[PlayerInvUpdate.CRITCHANCE] -= p.inv.inventory[p.inv.activeSlot].getStat("crit-chance").value;
-                swapStats[PlayerInvUpdate.HEALTH] -= p.inv.inventory[p.inv.activeSlot].getStat("health").value;
-                swapStats[PlayerInvUpdate.DEFENSE] -= p.inv.inventory[p.inv.activeSlot].getStat("defense").value;
-                swapStats[PlayerInvUpdate.MANA] -= p.inv.inventory[p.inv.activeSlot].getStat("mana").value;
+                swapStats[PlayerInvUpdate.DAMAGE] -= p.inv.inventory[p.inv.activeSlot].getStat(Stat.Damage).value;
+                swapStats[PlayerInvUpdate.STRENGTH] -= p.inv.inventory[p.inv.activeSlot].getStat(Stat.Strength).value;
+                swapStats[PlayerInvUpdate.CRITDAMAGE] -= p.inv.inventory[p.inv.activeSlot].getStat(Stat.CritDamage).value;
+                swapStats[PlayerInvUpdate.CRITCHANCE] -= p.inv.inventory[p.inv.activeSlot].getStat(Stat.CritChance).value;
+                swapStats[PlayerInvUpdate.HEALTH] -= p.inv.inventory[p.inv.activeSlot].getStat(Stat.Health).value;
+                swapStats[PlayerInvUpdate.DEFENSE] -= p.inv.inventory[p.inv.activeSlot].getStat(Stat.Defense).value;
+                swapStats[PlayerInvUpdate.MANA] -= p.inv.inventory[p.inv.activeSlot].getStat(Stat.Mana).value;
             }
             if (i <= 35) p.inv.inventory[i] = item;
             else {
                 var index = i-36;
                 if (p.inv.armor[index] != null) {
-                    swapStats[PlayerInvUpdate.DAMAGE] -= p.inv.armor[index].getStat("damage").value;
-                    swapStats[PlayerInvUpdate.STRENGTH] -= p.inv.armor[index].getStat("strength").value;
-                    swapStats[PlayerInvUpdate.CRITDAMAGE] -= p.inv.armor[index].getStat("crit-damage").value;
-                    swapStats[PlayerInvUpdate.CRITCHANCE] -= p.inv.armor[index].getStat("crit-chance").value;
-                    swapStats[PlayerInvUpdate.HEALTH] -= p.inv.armor[index].getStat("health").value;
-                    swapStats[PlayerInvUpdate.DEFENSE] -= p.inv.armor[index].getStat("defense").value;
-                    swapStats[PlayerInvUpdate.MANA] -= p.inv.armor[index].getStat("mana").value;
+                    swapStats[PlayerInvUpdate.DAMAGE] -= p.inv.armor[index].getStat(Stat.Damage).value;
+                    swapStats[PlayerInvUpdate.STRENGTH] -= p.inv.armor[index].getStat(Stat.Strength).value;
+                    swapStats[PlayerInvUpdate.CRITDAMAGE] -= p.inv.armor[index].getStat(Stat.CritDamage).value;
+                    swapStats[PlayerInvUpdate.CRITCHANCE] -= p.inv.armor[index].getStat(Stat.CritChance).value;
+                    swapStats[PlayerInvUpdate.HEALTH] -= p.inv.armor[index].getStat(Stat.Health).value;
+                    swapStats[PlayerInvUpdate.DEFENSE] -= p.inv.armor[index].getStat(Stat.Defense).value;
+                    swapStats[PlayerInvUpdate.MANA] -= p.inv.armor[index].getStat(Stat.Mana).value;
                 }
                 p.inv.armor[index] = item;
             }

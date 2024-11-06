@@ -6,6 +6,7 @@ import com.crumbed.crumbmmo.ecs.components.EntityStats;
 import com.crumbed.crumbmmo.ecs.components.RawEntity;
 import com.crumbed.crumbmmo.items.CItem;
 import com.crumbed.crumbmmo.managers.PlayerManager;
+import com.crumbed.crumbmmo.stats.Stat;
 import com.crumbed.crumbmmo.utils.Option;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -84,13 +85,13 @@ public class PlayerInvUpdate extends EntitySystem implements Listener {
                 inv.statBoosts.addAll(Arrays.asList(inv.armor));
                 inv.statBoosts.add(inv.inventory[inv.activeSlot]);
                 for (CItem item : inv.statBoosts) {
-                    swapStats[DAMAGE] += item.getStat("damage").value;
-                    swapStats[STRENGTH] += item.getStat("strength").value;
-                    swapStats[CRITDAMAGE] += item.getStat("crit-damage").value;
-                    swapStats[CRITCHANCE] += item.getStat("crit-chance").value;
-                    swapStats[HEALTH] += item.getStat("health").value;
-                    swapStats[DEFENSE] += item.getStat("defense").value;
-                    swapStats[MANA] += item.getStat("mana").value;
+                    swapStats[DAMAGE] += item.getStat(Stat.Damage).value;
+                    swapStats[STRENGTH] += item.getStat(Stat.Strength).value;
+                    swapStats[CRITDAMAGE] += item.getStat(Stat.CritDamage).value;
+                    swapStats[CRITCHANCE] += item.getStat(Stat.CritChance).value;
+                    swapStats[HEALTH] += item.getStat(Stat.Health).value;
+                    swapStats[DEFENSE] += item.getStat(Stat.Defense).value;
+                    swapStats[MANA] += item.getStat(Stat.Mana).value;
                 }
 
                 stats.damage.value += swapStats[DAMAGE];

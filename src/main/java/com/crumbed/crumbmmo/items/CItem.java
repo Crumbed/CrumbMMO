@@ -44,6 +44,16 @@ public class CItem {
         raw.setItemMeta(meta);
     }
     public CItem(ItemStack item) {
+        if (item == null) {
+            itemId = "null";
+            name = "";
+            rarity = Rarity.Contraband;
+            material = Material.AIR;
+            stats = new ItemStats();
+            lore = new ArrayList<>();
+            raw = new ItemStack(Material.AIR);
+            return;
+        }
         raw = item;
         var nbt = NBT.readNbt(item);
         if (!nbt.hasTag("item_id")) {

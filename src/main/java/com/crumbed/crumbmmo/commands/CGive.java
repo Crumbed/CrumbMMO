@@ -59,8 +59,7 @@ public class CGive extends BrigadierCommand {
         var itemId = c.getArgument("item-id", String.class);
         var item = ItemManager
             .INSTANCE
-            .itemReg
-            .get(c.getArgument("item-id", String.class));
+            .getItem(c.getArgument("item-id", String.class));
         if (item == null) {
             c.getSource().getBukkitSender().sendMessage(ChatColor.RED + "Invalid item ID: " + itemId);
             return Command.SINGLE_SUCCESS;

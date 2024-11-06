@@ -9,8 +9,8 @@ public class EntityInventory extends EntityComponent {
     public static int ID;
     @Override
     public int id() { return ID; }
-    public CItem armor[]; // 5 long
-    public transient CItem inventory[]; // 36 long
+    public CItem[] armor; // 5 long
+    public transient CItem[] inventory; // 36 long
     public int activeSlot;
     public transient ArrayList<CItem> statBoosts;
     public transient boolean hasUpdated;

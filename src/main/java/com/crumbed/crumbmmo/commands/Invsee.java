@@ -91,8 +91,7 @@ public class Invsee extends BrigadierCommand {
         playerHead.setItemMeta(meta);
         ItemStack menuGlass = ItemManager
                 .INSTANCE
-                .itemReg
-                .get("black_menu_glass")
+                .getItem("black_menu_glass")
                 .getRawItem();
         int offset = 0;
         for (int i = 0; i < 54; ++i) {

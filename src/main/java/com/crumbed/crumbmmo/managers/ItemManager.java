@@ -41,7 +41,7 @@ public class ItemManager {
 
     private ArrayList<String> itemIds;
     private ReadWriteNBT items;
-    private HashMap<String, ReadableNBT> itemReg;
+    private HashMap<String, ReadWriteNBT> itemReg;
     public CrumbMMO plugin;
 
     public ItemManager(CrumbMMO plugin) {
@@ -93,7 +93,12 @@ public class ItemManager {
 
     public CItem getItem(String id) {
         var cnbt = itemReg.get(id);
+        if (cnbt == null) return null;
         return new CItem(cnbt);
+    }
+
+    public boolean has(String id) {
+       return itemReg.containsKey(id);
     }
 
     public Stream<String> getItemIds() {

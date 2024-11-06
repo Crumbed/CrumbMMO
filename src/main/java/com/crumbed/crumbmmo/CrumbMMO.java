@@ -41,10 +41,7 @@ public final class CrumbMMO extends JavaPlugin {
         TimerManager.INSTANCE = TimerManager.init(this);
         CraftingManager.INSTANCE = CraftingManager.init(this);
         StatManager.init();
-        ItemManager.INSTANCE = new ItemManager.Builder(this)
-                .with(ItemLore.class)
-                .with(ItemStats.class)
-                .create();
+        ItemManager.INSTANCE = ItemManager.init(this);
 
         EntityManager.INSTANCE = new EntityManager.Builder(this)
                 .withComponent(EntityActionBar.class)

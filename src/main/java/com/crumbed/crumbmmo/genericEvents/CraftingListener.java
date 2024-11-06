@@ -92,8 +92,7 @@ public class CraftingListener implements Listener {
         } else {
             var citem = ItemManager
                     .INSTANCE
-                    .itemReg
-                    .get(resultItem.itemId());
+                    .getItem(resultItem.itemId());
             item = citem.getRawItem();
             item.setAmount(resultItem.count());
         }
