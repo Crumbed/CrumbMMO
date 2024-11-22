@@ -4,6 +4,7 @@ import com.crumbed.crumbmmo.ecs.components.*;
 import com.crumbed.crumbmmo.ecs.systems.PlayerInvUpdate;
 import com.crumbed.crumbmmo.stats.*;
 import com.crumbed.crumbmmo.jsonUtils.PlayerData;
+import de.tr7zw.nbtapi.iface.ReadWriteNBT;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.attribute.Attribute;
@@ -18,6 +19,10 @@ public class CPlayer extends CEntity {
     private EntityStats stats;
     public EntityInventory inv;
     public EntityActionBar actionBar;
+
+    public CPlayer(ReadWriteNBT nbt) {
+        
+    }
 
     public CPlayer(PlayerData data) {
         super(

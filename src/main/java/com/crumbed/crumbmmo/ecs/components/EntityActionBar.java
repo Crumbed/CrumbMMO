@@ -2,10 +2,15 @@ package com.crumbed.crumbmmo.ecs.components;
 
 import com.crumbed.crumbmmo.ecs.EntityComponent;
 import com.crumbed.crumbmmo.utils.ActionBar;
+import de.tr7zw.nbtapi.iface.NBTHandler;
+import de.tr7zw.nbtapi.iface.ReadWriteNBT;
+import de.tr7zw.nbtapi.iface.ReadableNBT;
 import net.md_5.bungee.api.chat.TextComponent;
+import org.jetbrains.annotations.NotNull;
 
 public class EntityActionBar extends EntityComponent {
     public static int ID;
+
     @Override
     public int id() { return ID; }
 

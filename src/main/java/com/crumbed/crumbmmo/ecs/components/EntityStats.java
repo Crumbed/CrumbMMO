@@ -3,7 +3,11 @@ package com.crumbed.crumbmmo.ecs.components;
 import com.crumbed.crumbmmo.ecs.EntityComponent;
 import com.crumbed.crumbmmo.stats.*;
 import com.google.gson.annotations.SerializedName;
+import de.tr7zw.nbtapi.iface.NBTHandler;
+import de.tr7zw.nbtapi.iface.ReadWriteNBT;
+import de.tr7zw.nbtapi.iface.ReadableNBT;
 import org.bukkit.ChatColor;
+import org.jetbrains.annotations.NotNull;
 
 import static com.crumbed.crumbmmo.stats.Stat.Health;
 
@@ -11,6 +15,27 @@ public class EntityStats extends EntityComponent {
     public static int ID;
     @Override
     public int id() { return ID; }
+
+    public static final NBTHandler<EntityStats> HANDLER = new NBTHandler<>() {
+        @Override
+        public void set(@NotNull ReadWriteNBT readWriteNBT, @NotNull String s, @NotNull EntityStats entityStats) { }
+
+        @Override
+        public EntityStats get(@NotNull ReadableNBT nbt, @NotNull String name) {
+            var tag = nbt.getCompound(name);
+            if (tag == null) return null;
+
+            var damage = tag.getInteger("damage");
+            var strength = tag.getInteger("strength");
+            var critDamage = tag.getInteger("crit_damage");
+            var critChance = tag.getFloat("crit_chance");
+            var defense = tag.getInteger("defense");
+            var health = tag.get("health", BigStat.HANDLER);
+            var mana = tag.get("health", BigStat.HANDLER);
+
+            return new EntityStats(damage, strength, critDamage, critChance, defense, health, mana);
+        }
+    };
 
     public Stat.Value damage;
     public Stat.Value strength;
@@ -22,6 +47,24 @@ public class EntityStats extends EntityComponent {
     public BigStat health;
     public BigStat mana;
 
+
+    public EntityStats(
+        double damage,
+        double strength,
+        double critDamage,
+        double critChance,
+        double defense,
+        BigStat health,
+        BigStat mana
+    ) {
+        this.damage = new Stat.Value(damage);
+        this.strength = new Stat.Value(strength);
+        this.critDamage = new Stat.Value(critDamage);
+        this.critChance = new Stat.Value(critChance);
+        this.defense = new Stat.Value(defense);
+        this.health = health;
+        this.mana = mana;
+    }
 
     public EntityStats(
         double damage,

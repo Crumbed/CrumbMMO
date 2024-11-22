@@ -15,6 +15,7 @@ import com.google.gson.GsonBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import de.tr7zw.nbtapi.NBT;
 import net.minecraft.commands.CommandSourceStack;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -24,6 +25,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -43,22 +46,18 @@ public class PlayerManager {
      * Map form Entity ID -> Health scale
      */
     private HashMap<Integer, Double> playerHealthScales;
+    private File dir;
+    private ArrayList<UUID> registered;
 
     private PlayerManager(CrumbMMO plugin) {
         playerIds = new HashMap<>();
         playerHealthScales = new HashMap<>();
-        File f = new File(plugin.getDataFolder(), "PlayerData.json");
+        dir = new File(plugin.getDataFolder(), "player_data");
+        if (!dir.exists()) dir.mkdirs();
 
-        if (!f.exists()) try {
-            f.createNewFile();
-            playerData = new JsonPlayerData();
-        } catch (IOException ignored){}
-        else try (Stream<String> lines = Files.lines(f.toPath())) {
-            String jsonPlayerData = String.join("\n", lines
-                    .collect(Collectors.toList()));
-            Gson gson = new Gson();
-            playerData = gson.fromJson(jsonPlayerData, JsonPlayerData.class);
-        } catch (IOException ignored){}
+        registered = Arrays.stream(dir.listFiles())
+            .map(x -> UUID.fromString(x.getName()))
+            .collect(Collectors.toCollection(ArrayList::new));
     }
     public static void init(CrumbMMO plugin) {
         if (INSTANCE == null) INSTANCE = new PlayerManager(plugin);
@@ -69,10 +68,27 @@ public class PlayerManager {
      */
     public HashMap<Integer, Double> getHealthScales() { return playerHealthScales; }
 
+    public boolean isRegistered(final Player player) {
+        return this.registered.contains(player.getUniqueId());
+    }
+
+    private CPlayer loadPlayer(UUID uuid) {
+        var f = new File(dir, uuid.toString());
+        // TEMPORARILY SNBT
+        // in future migrate to nbt binary files
+        try (var lines = Files.lines(f.toPath())) {
+            var playerData = String.join("\n", lines
+                .collect(Collectors.toList()));
+            var nbt = NBT.parseNBT(playerData);
+
+
+        } catch (IOException ignored) {}
+    }
+
     public void addPlayer(final Player player) {
         CPlayer p;
         // if player is new
-        if (!playerData.isPlayerRegistered(player.getUniqueId())) {
+        if (!isRegistered(player)) {
             p = CPlayer.newPlayer(player);
         } else {
             p = playerData.loadPlayer(player.getUniqueId());
